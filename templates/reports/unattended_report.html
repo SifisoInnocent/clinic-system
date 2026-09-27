@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Unattended Appointments - CCAMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Unattended Appointments Report</h2>
+        <a href="{% url 'reports:reports' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Reports
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Students with Multiple No-Shows</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Missed Appointments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.username }}</td>
+                            <td>{{ student.get_full_name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td><span class="badge bg-danger">{{ student.missed_count }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">No students with unattended appointments found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

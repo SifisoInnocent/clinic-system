@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}User Report - CCAMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-file-alt me-2"></i>
+                    User Report
+                </h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-secondary">
+                        <i class="fas fa-print me-2"></i>
+                        Print Report
+                    </button>
+                    <a href="{% url 'reports:reports' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Reports
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Report Period</h5>
+                            <p><strong>From:</strong> {{ date_from|date:"M d, Y" }}</p>
+                            <p><strong>To:</strong> {{ date_to|date:"M d, Y" }}</p>
+                            <p><strong>User Type:</strong> {{ user_type|title }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Summary</h5>
+                            <p><strong>Total Users:</strong> {{ total_count }}</p>
+                            <p><strong>Generated:</strong> {% now "M d, Y H:i" %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Member Since</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.get_full_name|default:"-" }}</td>
+                                    <td>{{ user.email|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ user.role|default:'secondary' }}">
+                                            {{ user.get_role_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No users found in this period</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

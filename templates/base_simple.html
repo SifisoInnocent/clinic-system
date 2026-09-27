@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+
+{% block title %}Login - CCAMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        animation: fadeInUp 0.4s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .card-header {
+        background: white;
+        border-radius: 24px 24px 0 0 !important;
+        padding: 32px 32px 0 32px;
+        border: none;
+    }
+    
+    .card-header h4 {
+        font-weight: 600;
+        letter-spacing: -0.3px;
+        color: #1a1a1a;
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        transition: color 0.2s ease;
+    }
+    
+    .password-toggle:hover {
+        color: #333;
+    }
+    
+    .demo-credentials {
+        background: #fafafa;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #eee;
+    }
+    
+    .demo-credentials:hover {
+        background: #f0f0f0;
+    }
+    
+    .role-badge {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 8px;
+        background-color: #999;
+    }
+    
+    .btn-loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+    
+    .form-check-input:checked {
+        background-color: #1a1a1a;
+        border-color: #1a1a1a;
+    }
+    
+    .form-check-input:focus {
+        border-color: #999;
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+    }
+    
+    .alert {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    hr {
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-100">
+    <div class="col-md-6 col-lg-5 login-container">
+        
+        <!-- Logo/Brand -->
+        <div class="text-center mb-4">
+            <div class="mb-2">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2 class="fw-semibold" style="color: #1a1a1a; letter-spacing: -0.5px;">CCAMS</h2>
+            <p class="text-secondary-emphasis mt-1" style="font-size: 14px; color: #666 !important;">Campus Clinic Appointment System</p>
+        </div>
+        
+        <!-- Main Login Card -->
+        <div class="card shadow-sm">
+            <div class="card-header text-center">
+                <h4 class="mb-0">Sign in</h4>
+                <p class="text-secondary-emphasis mt-2 mb-0" style="font-size: 14px; color: #666 !important;">Welcome back, please enter your details</p>
+            </div>
+            <div class="card-body p-4 p-md-5 pt-0">
+                
+                <!-- Error Message Display -->
+                <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="errorMessage"></span>
+                </div>
+                
+                <!-- Success Message Display -->
+                <div id="successAlert" class="alert alert-success d-none" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="successMessage"></span>
+                </div>
+                
+                <form method="post" id="loginForm" action="{% url 'accounts:login' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Username or Student Number</label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="username" 
+                               id="username"
+                               placeholder="e.g., student01 or admin" 
+                               required
+                               autocomplete="username"
+                               value="{{ request.POST.username }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <div class="position-relative">
+                            <input type="password" 
+                                   class="form-control" 
+                                   name="password" 
+                                   id="password"
+                                   placeholder="Enter your password" 
+                                   required
+                                   autocomplete="current-password">
+                            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Remember Me Checkbox -->
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
+                        <label class="form-check-label" for="rememberMe" style="font-size: 14px;">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <!-- Failed Attempts Warning -->
+                    <div id="attemptWarning" class="alert alert-warning small d-none py-2" style="font-size: 13px;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="attemptCount"></span> failed login attempt(s). Account will lock after 5 attempts.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary" id="loginBtn">
+                            Sign in
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none" style="color: #666; font-size: 14px;">
+                        Forgot password?
+                    </a>
+                    <span class="text-muted mx-2" style="color: #ccc !important;">•</span>
+                    <a href="/contact-support/" class="text-decoration-none" style="color: #666; font-size: 14px;">
+                        Need help?
+                    </a>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p style="font-size: 12px; color: #999; margin-bottom: 0;">Demo credentials</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Minimal Demo Credentials -->
+        <div class="card mt-3 demo-credentials" id="demoCard">
+            <div class="card-body p-3">
+                <div class="row g-2">
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded" onclick="fillCredentials('admin', 'admin123')" style="cursor: pointer;">
+                            <span class="role-badge"></span>
+                            <span style="font-size: 13px;">Admin</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded" onclick="fillCredentials('nurse01', 'nurse123')" style="cursor: pointer;">
+                            <span class="role-badge"></span>
+                            <span style="font-size: 13px;">Nurse</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded" onclick="fillCredentials('psych01', 'psych123')" style="cursor: pointer;">
+                            <span class="role-badge"></span>
+                            <span style="font-size: 13px;">Psychologist</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-2 rounded" onclick="fillCredentials('student01', 'student123')" style="cursor: pointer;">
+                            <span class="role-badge"></span>
+                            <span style="font-size: 13px;">Student</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle Password Visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    // Fill Demo Credentials Function
+    function fillCredentials(username, password) {
+        document.getElementById('username').value = username;
+        document.getElementById('password').value = password;
+        
+        // Show success indicator
+        showSuccess('Credentials filled');
+        
+        // Highlight the filled fields
+        document.getElementById('username').style.borderColor = '#999';
+        document.getElementById('password').style.borderColor = '#999';
+        
+        setTimeout(() => {
+            document.getElementById('username').style.borderColor = '';
+            document.getElementById('password').style.borderColor = '';
+        }, 1500);
+    }
+    
+    // Show Success Message
+    function showSuccess(message) {
+        const successAlert = document.getElementById('successAlert');
+        const successMessage = document.getElementById('successMessage');
+        if (successAlert && successMessage) {
+            successMessage.textContent = message;
+            successAlert.classList.remove('d-none');
+            
+            setTimeout(() => {
+                successAlert.classList.add('d-none');
+            }, 2000);
+        }
+    }
+    
+    // Show Error Message
+    function showError(message) {
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorAlert && errorMessage) {
+            errorMessage.textContent = message;
+            errorAlert.classList.remove('d-none');
+            
+            setTimeout(() => {
+                errorAlert.classList.add('d-none');
+            }, 4000);
+        }
+    }
+    
+    // Form Validation
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validation checks
+            if (!username) {
+                e.preventDefault();
+                showError('Please enter your username or student number.');
+                document.getElementById('username').focus();
+                return;
+            }
+            
+            if (!password) {
+                e.preventDefault();
+                showError('Please enter your password.');
+                document.getElementById('password').focus();
+                return;
+            }
+            
+            if (password.length < 4) {
+                e.preventDefault();
+                showError('Password must be at least 4 characters.');
+                return;
+            }
+            
+            // Show loading state on button
+            if (loginBtn) {
+                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Signing in...';
+                loginBtn.classList.add('btn-loading');
+            }
+        });
+    }
+    
+    // Remember Me functionality
+    if (localStorage.getItem('rememberedUsername')) {
+        const usernameField = document.getElementById('username');
+        const rememberCheck = document.getElementById('rememberMe');
+        if (usernameField && rememberCheck) {
+            usernameField.value = localStorage.getItem('rememberedUsername');
+            rememberCheck.checked = true;
+        }
+    }
+    
+    const rememberCheck = document.getElementById('rememberMe');
+    if (rememberCheck) {
+        rememberCheck.addEventListener('change', function() {
+            const usernameField = document.getElementById('username');
+            if (this.checked && usernameField) {
+                localStorage.setItem('rememberedUsername', usernameField.value);
+            } else {
+                localStorage.removeItem('rememberedUsername');
+            }
+        });
+    }
+    
+    // Save username when typing if remember me is checked
+    const usernameField = document.getElementById('username');
+    if (usernameField) {
+        usernameField.addEventListener('input', function() {
+            const rememberCheck = document.getElementById('rememberMe');
+            if (rememberCheck && rememberCheck.checked) {
+                localStorage.setItem('rememberedUsername', this.value);
+            }
+        });
+    }
+    
+    // Clear failed attempts on successful login (to be called after Django login)
+    function clearFailedAttempts() {
+        localStorage.removeItem('loginAttempts');
+        const attemptWarning = document.getElementById('attemptWarning');
+        if (attemptWarning) {
+            attemptWarning.classList.add('d-none');
+        }
+    }
+    
+    // Track failed login attempts from Django messages
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if there's an error message from Django
+        const errorAlert = document.getElementById('errorAlert');
+        if (errorAlert && errorAlert.classList.contains('alert-danger') && !errorAlert.classList.contains('d-none')) {
+            let attempts = localStorage.getItem('loginAttempts') || 0;
+            attempts++;
+            localStorage.setItem('loginAttempts', attempts);
+            
+            const attemptWarning = document.getElementById('attemptWarning');
+            const attemptCount = document.getElementById('attemptCount');
+            if (attemptWarning && attemptCount && attempts >= 3) {
+                attemptWarning.classList.remove('d-none');
+                attemptCount.textContent = attempts;
+            }
+        }
+    });
+</script>
+{% endblock %}

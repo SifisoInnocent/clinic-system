@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Log - CCAMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-history me-2"></i>
+                Audit Log
+            </h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" name="search" class="form-control" placeholder="Search audit log..." value="{{ search_query }}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-outline-primary">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Description</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in audit_logs %}
+                                <tr>
+                                    <td>{{ log.timestamp|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if log.admin %}
+                                            {{ log.admin.get_full_name|default:log.admin.username }}
+                                        {% else %}
+                                            System
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ log.action|default:'secondary' }}">
+                                            {{ log.action|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ log.description|truncatechars:100 }}</td>
+                                    <td>{{ log.ip_address|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No audit logs found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | {% if is_student %}My Appointments{% elif is_staff %}My Appointments{% else %}All Appointments{% endif %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- FullCalendar 6 -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    
+    {% load static %}
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    
+    <script>
+        (function() {
+            const theme = localStorage.getItem('ccams_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            const fontScale = localStorage.getItem('ccams_font_scale') || 'font-md';
+            document.documentElement.className = fontScale;
+        })();
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .appointment-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e2a5e, #2c3e6e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            border-radius: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1e2a5e;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 0.2rem rgba(30, 42, 94, 0.25);
+        }
+        
+        .table {
+            background: transparent;
+        }
+        
+        .table th {
+            border-bottom: 2px solid rgba(30, 42, 94, 0.1);
+            color: #1e2a5e;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(100, 108, 255, 0.05);
+        }
+        
+        .pagination .page-link {
+            border: none;
+            color: #1e2a5e;
+            margin: 0 2px;
+            border-radius: 0.5rem;
+        }
+        
+        .pagination .page-link:hover {
+            background: rgba(30, 42, 94, 0.1);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            color: white;
+        }
+        
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold" href="{% url 'dashboard:dashboard' %}">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold active" href="{% url 'appointments:appointment_list' %}">Appointments</a></li>
+                {% if not is_student %}
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'availability:availability_list' %}">Schedule</a></li>
+                {% endif %}
+                {% if request.user.is_admin %}
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'accounts:user_list' %}">Users</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'reports:reports' %}">Reports</a></li>
+                {% endif %}
+                <li class="nav-item ms-lg-2">
+                    <div class="dropdown">
+                        <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container pt-5 pb-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5 animate-up">
+        <div class="badge bg-light text-dark rounded-pill px-4 py-2 mb-3 shadow-sm">
+            <i class="fas fa-calendar me-2"></i>{% if is_student %}Student{% elif is_staff %}Staff{% else %}Admin{% endif %} Portal
+        </div>
+        <h1 class="hero-title mb-3">{% if is_student %}My Appointments{% elif is_staff %}My Appointments{% else %}All Appointments{% endif %}</h1>
+        <p class="text-secondary-emphasis fs-5" style="color: #2d3a4a;">Manage and track your appointment schedule</p>
+        {% if is_student %}
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{% url 'appointments:appointment_book' %}" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white">
+                <i class="fas fa-plus me-2"></i>Book Appointment
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="appointment-card p-4 mb-4 animate-up" style="animation-delay: 0.1s;">
+        <div class="d-flex align-items-center mb-4">
+            <i class="fas fa-search fa-2x me-3" style="color: #1e2a5e;"></i>
+            <div>
+                <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Search & Filter</h5>
+                <p class="text-secondary mb-0">Find specific appointments</p>
+            </div>
+        </div>
+        <form method="get">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Search</label>
+                    <input type="text" class="form-control" name="search" placeholder="Search appointments..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select class="form-control" name="status">
+                        <option value="">All Status</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="no_show" {% if request.GET.status == 'no_show' %}selected{% endif %}>No Show</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">From Date</label>
+                    <input type="date" class="form-control" name="date_from" value="{{ request.GET.date_from }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">To Date</label>
+                    <input type="date" class="form-control" name="date_to" value="{{ request.GET.date_to }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white">
+                            <i class="fas fa-search me-2"></i>Search
+                        </button>
+                        <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="fas fa-times me-2"></i>Clear
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Appointments Table -->
+    <div class="appointment-card p-4 animate-up" style="animation-delay: 0.2s;">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-list fa-2x me-3" style="color: #1e2a5e;"></i>
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Appointment List</h5>
+                    <p class="text-secondary mb-0">{{ appointments.count }} total appointments</p>
+                </div>
+            </div>
+        </div>
+        <!-- Quick Filter Pills & Live Search & View Toggle -->
+        <div class="mb-4">
+            <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                <span class="text-secondary small fw-semibold me-1"><i class="fas fa-filter me-1"></i>Filter:</span>
+                <button type="button" class="btn btn-sm btn-dark rounded-pill px-3 filter-pill active" onclick="applyStatusFilter('all', this)">All</button>
+                <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 filter-pill" onclick="applyStatusFilter('pending', this)">Pending</button>
+                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 filter-pill" onclick="applyStatusFilter('confirmed', this)">Confirmed</button>
+                <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 filter-pill" onclick="applyStatusFilter('completed', this)">Completed</button>
+                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 filter-pill" onclick="applyStatusFilter('cancelled', this)">Cancelled</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-pill" onclick="applyStatusFilter('no_show', this)">No Show</button>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="input-group" style="max-width: 340px;">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" id="tableInstantSearch" class="form-control border-start-0" placeholder="Instant table search..." oninput="handleInstantSearch(this.value)">
+                </div>
+                <div class="btn-group rounded-pill shadow-sm p-1 bg-light border" role="group">
+                    <button type="button" id="tableViewBtn" class="btn btn-sm btn-primary rounded-pill px-3 active" onclick="switchView('table')">
+                        <i class="fas fa-list me-1"></i>Table List
+                    </button>
+                    <button type="button" id="calendarViewBtn" class="btn btn-sm btn-outline-secondary rounded-pill px-3 border-0" onclick="switchView('calendar')">
+                        <i class="fas fa-calendar-alt me-1"></i>Calendar View
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Calendar Container -->
+        <div id="calendarViewContainer" class="d-none my-3 p-3 rounded-4 bg-white shadow-sm">
+            <div id="fullCalendarElem" style="min-height: 550px;"></div>
+        </div>
+
+        <div id="tableViewContainer">
+        {% if appointments %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="appointmentsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            {% if not is_student %}
+                            <th>Student</th>
+                            <th>Student ID</th>
+                            {% endif %}
+                            <th>Date</th>
+                            <th>Time</th>
+                            {% if not is_staff %}
+                            <th>Provider</th>
+                            <th>Type</th>
+                            {% endif %}
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr class="appointment-row" data-status="{{ appointment.status }}">
+                            <td>
+                                <strong>{{ appointment.appointment_id }}</strong>
+                                {% if appointment.is_past %}
+                                <span class="badge bg-secondary ms-1">Past</span>
+                                {% endif %}
+                            </td>
+                            {% if not is_student %}
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                        {{ appointment.student.get_full_name|default:appointment.student.username|slice:":2"|upper }}
+                                    </div>
+                                    {{ appointment.student.get_full_name }}
+                                </div>
+                            </td>
+                            <td>{{ appointment.student.student_number|default:"N/A" }}</td>
+                            {% endif %}
+                            <td>{{ appointment.appointment_date }}</td>
+                            <td>{{ appointment.appointment_time }}</td>
+                            {% if not is_staff %}
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                        {{ appointment.staff.get_full_name|default:appointment.staff.username|slice:":2"|upper }}
+                                    </div>
+                                    {{ appointment.staff.get_full_name }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge bg-info text-white">{{ appointment.get_provider_type_display }}</span>
+                            </td>
+                            {% endif %}
+                            <td>
+                                <span class="text-truncate d-inline-block" style="max-width: 200px;" 
+                                      title="{{ appointment.reason }}">
+                                    {{ appointment.reason|truncatechars:30 }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if appointment.status == 'pending' %}bg-warning{% elif appointment.status == 'confirmed' %}bg-success{% elif appointment.status == 'completed' %}bg-info{% elif appointment.status == 'cancelled' %}bg-danger{% elif appointment.status == 'no_show' %}bg-secondary{% endif %} text-white">
+                                    {{ appointment.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'appointments:appointment_detail' appointment.appointment_id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if is_student %}
+                                        {% if appointment.can_be_cancelled %}
+                                        <a href="{% url 'appointments:appointment_cancel' appointment.appointment_id %}" 
+                                           class="btn btn-sm btn-outline-danger" title="Cancel">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if appointment.can_be_rescheduled %}
+                                        <a href="{% url 'appointments:appointment_reschedule' appointment.appointment_id %}" 
+                                           class="btn btn-sm btn-outline-warning" title="Reschedule">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </a>
+                                        {% endif %}
+                                    {% elif is_staff %}
+                                        {% if appointment.status == 'confirmed' or appointment.status == 'pending' %}
+                                        <a href="{% url 'appointments:appointment_update_status' appointment.appointment_id %}" 
+                                           class="btn btn-sm btn-outline-success" title="Update Status">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Appointment pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No appointments found</h5>
+                <p class="text-muted">
+                    {% if is_student %}
+                        You haven't booked any appointments yet.
+                    {% else %}
+                        No appointments match your search criteria.
+                    {% endif %}
+                </p>
+                {% if is_student %}
+                <a href="{% url 'appointments:appointment_book' %}" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white">
+                    <i class="fas fa-plus me-2"></i>Book Your First Appointment
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+        </div> <!-- /tableViewContainer -->
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // FullCalendar Events
+    let calendar = null;
+    const calendarEvents = [
+        {% for a in appointments %}
+        {
+            id: '{{ a.appointment_id }}',
+            title: '{% if is_student %}{{ a.staff.get_full_name|default:a.staff.username }}{% else %}{{ a.student.get_full_name|default:a.student.username }}{% endif %}',
+            start: '{{ a.appointment_date|date:"Y-m-d" }}T{{ a.appointment_time|time:"H:i:s" }}',
+            url: '{% url "appointments:appointment_detail" a.appointment_id %}',
+            backgroundColor: '{% if a.status == "confirmed" %}#00b894{% elif a.status == "pending" %}#f39c12{% elif a.status == "completed" %}#0984e3{% elif a.status == "cancelled" %}#d63031{% else %}#636e72{% endif %}',
+            borderColor: 'transparent'
+        },
+        {% endfor %}
+    ];
+
+    function switchView(viewType) {
+        const tableContainer = document.getElementById('tableViewContainer');
+        const calContainer = document.getElementById('calendarViewContainer');
+        const tableBtn = document.getElementById('tableViewBtn');
+        const calBtn = document.getElementById('calendarViewBtn');
+
+        if (viewType === 'calendar') {
+            tableContainer.classList.add('d-none');
+            calContainer.classList.remove('d-none');
+            calBtn.classList.remove('btn-outline-secondary', 'border-0');
+            calBtn.classList.add('btn-primary', 'active');
+            tableBtn.classList.remove('btn-primary', 'active');
+            tableBtn.classList.add('btn-outline-secondary', 'border-0');
+
+            if (!calendar) {
+                const calendarEl = document.getElementById('fullCalendarElem');
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                    },
+                    events: calendarEvents,
+                    eventClick: function(info) {
+                        if (info.event.url) {
+                            info.jsEvent.preventDefault();
+                            window.location.href = info.event.url;
+                        }
+                    }
+                });
+                calendar.render();
+            } else {
+                calendar.updateSize();
+            }
+        } else {
+            calContainer.classList.add('d-none');
+            tableContainer.classList.remove('d-none');
+            tableBtn.classList.remove('btn-outline-secondary', 'border-0');
+            tableBtn.classList.add('btn-primary', 'active');
+            calBtn.classList.remove('btn-primary', 'active');
+            calBtn.classList.add('btn-outline-secondary', 'border-0');
+        }
+    }
+
+    // Instant Keystroke Filter and Status Pills
+    let currentStatusFilter = 'all';
+
+    function applyStatusFilter(status, btnElem) {
+        currentStatusFilter = status;
+        document.querySelectorAll('.filter-pill').forEach(btn => {
+            btn.classList.remove('active', 'btn-dark');
+        });
+        btnElem.classList.add('active', 'btn-dark');
+        filterTableRows();
+    }
+
+    function handleInstantSearch() {
+        filterTableRows();
+    }
+
+    function filterTableRows() {
+        const query = (document.getElementById('tableInstantSearch')?.value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('#appointmentsTable tbody tr.appointment-row');
+        
+        rows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status') || '';
+            const rowText = row.innerText.toLowerCase();
+            
+            const matchesStatus = (currentStatusFilter === 'all') || (rowStatus === currentStatusFilter);
+            const matchesQuery = !query || rowText.includes(query);
+            
+            if (matchesStatus && matchesQuery) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Add smooth animations on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-up').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+</body>
+</html>

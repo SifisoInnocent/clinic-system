@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | Register</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: modern mix -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Register card - floating glass elevated */
+        .register-glass {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .register-glass:hover {
+            transform: scale(1.01);
+        }
+        
+        .form-control-custom {
+            border-radius: 1.2rem;
+            padding: 0.75rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffffcc;
+            transition: all 0.2s;
+        }
+        
+        .form-control-custom:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+            background: white;
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .role-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .role-option {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .role-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .role-option .role-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 1.2rem;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+            background: #ffffffcc;
+            backdrop-filter: blur(8px);
+        }
+        
+        .role-option input[type="radio"]:checked + .role-card {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.1);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+        
+        .role-option .role-card:hover {
+            border-color: #6c5ce7;
+            background: white;
+        }
+        
+        .role-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #6c5ce7;
+        }
+        
+        .role-option input[type="radio"]:checked + .role-card .role-icon {
+            color: #6c5ce7;
+        }
+        
+        .role-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            margin: 0;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #7c7e8c;
+            transition: color 0.2s ease;
+        }
+        
+        .password-toggle:hover {
+            color: #6c5ce7;
+        }
+        
+        .alert-custom {
+            border-radius: 1rem;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: none;
+        }
+        
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.4rem;
+            }
+            .register-glass {
+                margin-top: 1rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar (clean home feel) -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold" href="#">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#features">Services</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#about">About</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#contact">Contact</a></li>
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-outline-dark rounded-pill px-4" href="#register-panel" style="font-weight: 500;">Register</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <!-- Hero Section + Register side by side -->
+    <div class="container pt-5 pb-5" id="home">
+        <div class="row align-items-center g-5">
+            <!-- left hero content -->
+            <div class="col-lg-6 animate-up">
+                <div class="badge bg-light text-dark rounded-pill px-3 py-2 mb-3 shadow-sm">
+                    <i class="fas fa-user-plus me-1"></i> Join Our Community
+                </div>
+                <h1 class="hero-title mb-3">Create your<br>health <span style="color:#2c3e6e;">account today.</span></h1>
+                <p class="text-secondary-emphasis fs-5 mb-4" style="color: #2d3a4a;">Join thousands of students and staff managing their health appointments seamlessly. Get started in minutes with secure, modern healthcare management.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#register-panel" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white"><i class="fas fa-user-plus me-2"></i>Register Now</a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">Already have account? <i class="fas fa-sign-in-alt ms-2"></i></a>
+                </div>
+                <div class="row mt-5 g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center gap-2"><i class="fas fa-shield-alt text-primary"></i><span class="small">Secure Registration</span></div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center gap-2"><i class="fas fa-clock text-primary"></i><span class="small">Quick Setup</span></div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="d-flex align-items-center gap-2"><i class="fas fa-mobile-alt text-primary"></i><span class="small">Mobile Ready</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- RIGHT SIDE: REGISTER CARD (premium floating) -->
+            <div class="col-lg-5 offset-lg-1 animate-up" id="register-panel">
+                <div class="register-glass p-4 p-xl-5">
+                    <div class="text-center mb-4">
+                        <div class="mx-auto bg-white rounded-circle d-inline-flex p-2 shadow-sm mb-2">
+                            <i class="fas fa-user-plus fa-3x" style="color: #1e2a5e;"></i>
+                        </div>
+                        <h3 class="fw-bold" style="color: #1e2a5e;">Create Account</h3>
+                        <p class="text-secondary">Join our healthcare community</p>
+                    </div>
+                    
+                    <!-- error / success messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-custom d-none" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i><span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" id="registerForm" action="/accounts/register/">
+                        {% csrf_token %}
+                        
+                        <!-- Role Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Select Your Role</label>
+                            <div class="role-selection">
+                                <div class="role-option">
+                                    <input type="radio" name="role" value="student" id="role_student" checked>
+                                    <div class="role-card">
+                                        <div class="role-icon">
+                                            <i class="fas fa-graduation-cap"></i>
+                                        </div>
+                                        <p class="role-name">Student</p>
+                                    </div>
+                                </div>
+                                <div class="role-option">
+                                    <input type="radio" name="role" value="nurse" id="role_nurse">
+                                    <div class="role-card">
+                                        <div class="role-icon">
+                                            <i class="fas fa-user-nurse"></i>
+                                        </div>
+                                        <p class="role-name">Nurse</p>
+                                    </div>
+                                </div>
+                                <div class="role-option">
+                                    <input type="radio" name="role" value="psychologist" id="role_psychologist">
+                                    <div class="role-card">
+                                        <div class="role-icon">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <p class="role-name">Psychologist</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">First Name</label>
+                                    <input type="text" class="form-control form-control-custom" name="first_name" id="first_name" placeholder="First name" required value="{{ request.POST.first_name }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Last Name</label>
+                                    <input type="text" class="form-control form-control-custom" name="last_name" id="last_name" placeholder="Last name" required value="{{ request.POST.last_name }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username</label>
+                            <input type="text" class="form-control form-control-custom" name="username" id="username" placeholder="Choose username" required value="{{ request.POST.username }}">
+                        </div>
+                        
+                        <div class="mb-3" id="student_number_field">
+                            <label class="form-label fw-semibold">Student Number</label>
+                            <input type="text" class="form-control form-control-custom" name="student_number" id="student_number" placeholder="Student number" value="{{ request.POST.student_number }}">
+                        </div>
+                        
+                        <div class="mb-3" id="employee_id_field" style="display: none;">
+                            <label class="form-label fw-semibold">Employee ID</label>
+                            <input type="text" class="form-control form-control-custom" name="employee_id" id="employee_id" placeholder="Employee ID" value="{{ request.POST.employee_id }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" class="form-control form-control-custom" name="email" id="email" placeholder="email@example.com" required value="{{ request.POST.email }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" class="form-control form-control-custom" name="phone_number" id="phone_number" placeholder="+1 234 567 8900" value="{{ request.POST.phone_number }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="position-relative">
+                                <input type="password" class="form-control form-control-custom" name="password1" id="password1" placeholder="Create password" required>
+                                <i class="fas fa-eye-slash password-toggle" id="togglePassword1"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Confirm Password</label>
+                            <div class="position-relative">
+                                <input type="password" class="form-control form-control-custom" name="password2" id="password2" placeholder="Confirm password" required>
+                                <i class="fas fa-eye-slash password-toggle" id="togglePassword2"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                            <label class="form-check-label small" for="terms">I agree to the <a href="#" style="color:#6c5ce7;">Terms and Conditions</a></label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-gradient w-100 text-white" id="registerBtn">
+                            <i class="fas fa-user-plus me-2"></i> Create Account
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'accounts:login' %}" class="small text-decoration-none" style="color:#2c3e6e;">Already have account? <i class="fas fa-chevron-right ms-1 fa-xs"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FEATURE CARDS (home section) -->
+    <div class="container mt-5 pt-4" id="features">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-4 py-2">why join ccams</span>
+            <h2 class="display-6 fw-bold mt-2" style="color: #1e2a5e;">Benefits of joining our<br>healthcare platform</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="rounded-circle bg-white shadow-sm d-inline-flex p-3 mb-3"><i class="fas fa-calendar-check fa-2x" style="color:#2c3e6e;"></i></div>
+                    <h5 class="fw-bold">Easy Appointments</h5>
+                    <p class="text-secondary">Book, manage, and track all your healthcare appointments in one place with real-time availability.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="rounded-circle bg-white shadow-sm d-inline-flex p-3 mb-3"><i class="fas fa-lock fa-2x" style="color:#2c3e6e;"></i></div>
+                    <h5 class="fw-bold">Secure & Private</h5>
+                    <p class="text-secondary">Your health data is protected with enterprise-grade security and HIPAA-compliant privacy controls.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="rounded-circle bg-white shadow-sm d-inline-flex p-3 mb-3"><i class="fas fa-mobile-alt fa-2x" style="color:#2c3e6e;"></i></div>
+                    <h5 class="fw-bold">Mobile Access</h5>
+                    <p class="text-secondary">Access your health information and manage appointments from anywhere, on any device.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark bg-opacity-5 mt-5 pt-5 pb-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5 class="fw-bold" style="color:#1e2a5e;">CCAMS</h5>
+                <p class="small text-secondary">Campus Clinic Appointment Management System — Your gateway to better healthcare.</p>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h6 class="fw-semibold">Platform</h6>
+                <ul class="list-unstyled small"><li><a href="#" class="text-decoration-none" style="color:#4a5568;">Appointments</a></li><li><a href="#" class="text-decoration-none" style="color:#4a5568;">Telehealth</a></li><li><a href="#" class="text-decoration-none" style="color:#4a5568;">Records</a></li></ul>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h6 class="fw-semibold">Support</h6>
+                <ul class="list-unstyled small"><li><a href="#" class="text-decoration-none" style="color:#4a5568;">Help Center</a></li><li><a href="#" class="text-decoration-none" style="color:#4a5568;">Privacy</a></li><li><a href="#" class="text-decoration-none" style="color:#4a5568;">Terms</a></li></ul>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h6 class="fw-semibold">Get Started</h6>
+                <div class="d-flex gap-3"><i class="fab fa-twitter fa-lg" style="color:#4a5568;"></i><i class="fab fa-instagram fa-lg" style="color:#4a5568;"></i><i class="fab fa-linkedin fa-lg" style="color:#4a5568;"></i></div>
+                <p class="mt-2 small text-secondary">© 2026 CCAMS — Join our healthcare community</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle password visibility
+    const togglePassword1 = document.getElementById('togglePassword1');
+    const passwordInput1 = document.getElementById('password1');
+    const togglePassword2 = document.getElementById('togglePassword2');
+    const passwordInput2 = document.getElementById('password2');
+    
+    if(togglePassword1) {
+        togglePassword1.addEventListener('click', function () {
+            const type = passwordInput1.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput1.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    if(togglePassword2) {
+        togglePassword2.addEventListener('click', function () {
+            const type = passwordInput2.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput2.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    // Role selection handler
+    const roleRadios = document.querySelectorAll('input[name="role"]');
+    const roleCards = document.querySelectorAll('.role-card');
+    const studentNumberField = document.getElementById('student_number_field');
+    const employeeIdField = document.getElementById('employee_id_field');
+    
+    // Add click handlers to role cards
+    roleCards.forEach((card, index) => {
+        card.addEventListener('click', function() {
+            const radio = roleRadios[index];
+            if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+    
+    roleRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Show/hide appropriate fields based on role
+            if (this.value === 'student') {
+                studentNumberField.style.display = 'block';
+                employeeIdField.style.display = 'none';
+                document.getElementById('student_number').required = true;
+                document.getElementById('employee_id').required = false;
+            } else {
+                studentNumberField.style.display = 'none';
+                employeeIdField.style.display = 'block';
+                document.getElementById('student_number').required = false;
+                document.getElementById('employee_id').required = true;
+            }
+        });
+    });
+    
+    // Form validation
+    const registerForm = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    if(registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+            const terms = document.getElementById('terms').checked;
+            
+            if(!password1 || !password2) {
+                e.preventDefault();
+                showError('Both password fields are required.');
+                return false;
+            }
+            
+            if(password1 !== password2) {
+                e.preventDefault();
+                showError('Passwords do not match.');
+                return false;
+            }
+            
+            if(password1.length < 6) {
+                e.preventDefault();
+                showError('Password must be at least 6 characters long.');
+                return false;
+            }
+            
+            if(!terms) {
+                e.preventDefault();
+                showError('You must agree to the terms and conditions.');
+                return false;
+            }
+            
+            if(registerBtn) {
+                registerBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Creating Account...';
+                registerBtn.disabled = true;
+                registerBtn.classList.add('opacity-75');
+            }
+            return true;
+        });
+    }
+    
+    function showError(message) {
+        const errorAlert = document.querySelector('.alert-custom') || document.createElement('div');
+        errorAlert.className = 'alert alert-custom';
+        errorAlert.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
+        if(!document.querySelector('.alert-custom')) {
+            const form = document.getElementById('registerForm');
+            form.parentNode.insertBefore(errorAlert, form);
+        }
+        setTimeout(() => errorAlert.classList.add('d-none'), 4000);
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href');
+            if(targetId !== "#" && targetId !== "" && targetId !== "#register-panel" && targetId !== "#features") {
+                const targetElem = document.querySelector(targetId);
+                if(targetElem) {
+                    e.preventDefault();
+                    targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

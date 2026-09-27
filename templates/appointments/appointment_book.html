@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment - CCAMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    Book New Appointment
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if request.user.has_active_booking %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Active Booking:</strong> You already have an active appointment. Please cancel or reschedule it before booking a new one.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div class="text-center">
+                    <a href="/appointments/" class="btn btn-primary">
+                        <i class="fas fa-calendar me-2"></i>View My Appointments
+                    </a>
+                </div>
+                {% else %}
+                <form method="post" id="appointmentForm">
+                    {% csrf_token %}
+                    
+                    <!-- Step 1: Provider Type -->
+                    <div class="step-section" id="step1">
+                        <h5 class="mb-3">
+                            <i class="fas fa-user-md me-2"></i>
+                            Step 1: Select Provider Type
+                        </h5>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Provider Type</label>
+                            <select class="form-control" name="provider_type" id="id_provider_type" required>
+                                <option value="">Select Provider Type</option>
+                                <option value="nurse">Nurse</option>
+                                <option value="psychologist">Psychologist</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Staff Selection -->
+                    <div class="step-section" id="step2" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-user me-2"></i>
+                            Step 2: Select Provider
+                        </h5>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Provider</label>
+                            <select class="form-control" name="staff" id="id_staff" required>
+                                <option value="">Select Provider</option>
+                                <!-- Staff options will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Date Selection -->
+                    <div class="step-section" id="step3" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-calendar me-2"></i>
+                            Step 3: Select Date
+                        </h5>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Appointment Date</label>
+                            <input type="date" class="form-control" name="appointment_date" id="id_appointment_date" required>
+                            <small class="form-text text-muted">
+                                Select a date from the calendar. Appointments are only available on weekdays.
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Time Selection -->
+                    <div class="step-section" id="step4" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-clock me-2"></i>
+                            Step 4: Select Time
+                        </h5>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Appointment Time</label>
+                            <select class="form-control" name="appointment_time" id="id_appointment_time" required>
+                                <option value="">Select Time</option>
+                                <!-- Time slots will be loaded dynamically -->
+                            </select>
+                            <div id="availableSlots" class="mt-3">
+                                <!-- Available slots will be loaded here via AJAX -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 5: Reason -->
+                    <div class="step-section" id="step5" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-comment-medical me-2"></i>
+                            Step 5: Appointment Reason
+                        </h5>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Appointment Reason</label>
+                            <textarea class="form-control" name="reason" id="id_reason" rows="4" required placeholder="Please provide a brief description of the reason for your appointment."></textarea>
+                            <small class="form-text text-muted">
+                                Please provide a brief description of the reason for your appointment.
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 6: Confirmation -->
+                    <div class="step-section" id="step6" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Step 6: Confirm Appointment
+                        </h5>
+                        <div class="alert alert-info">
+                            <h6>Appointment Summary:</h6>
+                            <div id="appointmentSummary">
+                                <!-- Summary will be populated here -->
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirmCheck" required>
+                            <label class="form-check-label" for="confirmCheck">
+                                I confirm that all the information above is correct and I agree to the appointment terms.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+                            <i class="fas fa-arrow-left me-2"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" id="nextBtn">
+                            Next <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+                            <i class="fas fa-check me-2"></i> Book Appointment
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentStep = 1;
+    const totalSteps = 6;
+    const form = document.getElementById('appointmentForm');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Check if all elements exist
+    if (!form || !nextBtn || !prevBtn || !submitBtn) {
+        console.error('Missing form elements');
+        return;
+    }
+    
+    function showStep(step) {
+        // Hide all steps
+        for (let i = 1; i <= totalSteps; i++) {
+            document.getElementById(`step${i}`).style.display = 'none';
+        }
+        // Show current step
+        document.getElementById(`step${step}`).style.display = 'block';
+        
+        // Update buttons
+        prevBtn.style.display = step > 1 ? 'inline-block' : 'none';
+        nextBtn.style.display = step < totalSteps ? 'inline-block' : 'none';
+        submitBtn.style.display = step === totalSteps ? 'inline-block' : 'none';
+        
+        // Update summary if on confirmation step
+        if (step === totalSteps) {
+            updateSummary();
+        }
+    }
+    
+    function validateStep(step) {
+        try {
+            if (step === 1) {
+                const providerType = document.getElementById('id_provider_type');
+                return providerType && providerType.value !== '';
+            } else if (step === 2) {
+                const staff = document.getElementById('id_staff');
+                return staff && staff.value !== '';
+            } else if (step === 3) {
+                const date = document.getElementById('id_appointment_date');
+                return date && date.value !== '';
+            } else if (step === 4) {
+                const time = document.getElementById('id_appointment_time');
+                return time && time.value !== '';
+            } else if (step === 5) {
+                const reason = document.getElementById('id_reason');
+                return reason && reason.value.trim() !== '';
+            }
+            return true;
+        } catch (error) {
+            console.error('Validation error:', error);
+            return false;
+        }
+    }
+    
+    function updateSummary() {
+        try {
+            const providerType = document.getElementById('id_provider_type');
+            const staff = document.getElementById('id_staff');
+            const date = document.getElementById('id_appointment_date');
+            const time = document.getElementById('id_appointment_time');
+            const reason = document.getElementById('id_reason');
+            
+            if (!providerType || !staff || !date || !time || !reason) {
+                console.error('Missing summary elements');
+                return;
+            }
+            
+            const providerTypeText = providerType.options[providerType.selectedIndex]?.text || 'Not selected';
+            const staffText = staff.options[staff.selectedIndex]?.text || 'Not selected';
+            
+            const summary = `
+                <p><strong>Provider Type:</strong> ${providerTypeText}</p>
+                <p><strong>Provider:</strong> ${staffText}</p>
+                <p><strong>Date:</strong> ${date.value || 'Not selected'}</p>
+                <p><strong>Time:</strong> ${time.options[time.selectedIndex]?.text || time.value || 'Not selected'}</p>
+                <p><strong>Reason:</strong> ${reason.value || 'Not provided'}</p>
+            `;
+            
+            const summaryElement = document.getElementById('appointmentSummary');
+            if (summaryElement) {
+                summaryElement.innerHTML = summary;
+            }
+        } catch (error) {
+            console.error('Summary update error:', error);
+        }
+    }
+    
+    // Load staff when provider type changes
+    const providerTypeElement = document.getElementById('id_provider_type');
+    if (providerTypeElement) {
+        providerTypeElement.addEventListener('change', function() {
+            const providerType = this.value;
+            const staffSelect = document.getElementById('id_staff');
+            
+            if (providerType && staffSelect) {
+                // Load staff options based on provider type
+                loadStaffOptions(providerType);
+                staffSelect.disabled = false;
+            }
+        });
+    }
+    
+    // Function to load staff options
+    function loadStaffOptions(providerType) {
+        const staffSelect = document.getElementById('id_staff');
+        if (!staffSelect) return;
+        
+        // Clear existing options
+        staffSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        // Load staff from database
+        console.log('Loading staff for provider type:', providerType);
+        
+        fetch(`/appointments/api/staff-by-type/?provider_type=${providerType}`, {
+            method: 'GET'
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Staff data received:', data);
+            staffSelect.innerHTML = '<option value="">Select Provider</option>';
+            
+            if (data.staff && data.staff.length > 0) {
+                console.log('Found staff:', data.staff.length);
+                data.staff.forEach(staff => {
+                    staffSelect.innerHTML += `<option value="${staff.id}">${staff.name}</option>`;
+                });
+            } else {
+                console.log('No staff found');
+                staffSelect.innerHTML += '<option value="">No staff available</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading staff:', error);
+            staffSelect.innerHTML = '<option value="">Error loading staff</option>';
+        });
+    }
+    
+    // Load available slots when date and staff are selected
+    function loadAvailableSlots() {
+        const staffId = document.getElementById('id_staff').value;
+        const date = document.getElementById('id_appointment_date').value;
+        const timeSelect = document.getElementById('id_appointment_time');
+        
+        if (!staffId || !date || !timeSelect) return;
+        
+        // Clear existing time options
+        timeSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        fetch(`/appointments/api/available-slots/?staff_id=${staffId}&date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                timeSelect.innerHTML = '<option value="">Select Time</option>';
+                
+                if (data.slots && data.slots.length > 0) {
+                    data.slots.forEach(slot => {
+                        timeSelect.innerHTML += `<option value="${slot.time}">${slot.display}</option>`;
+                    });
+                } else {
+                    timeSelect.innerHTML += '<option value="">No available slots</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading slots:', error);
+                timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+            });
+    }
+    
+    // Event listeners for date and staff changes
+    const staffElement = document.getElementById('id_staff');
+    const dateElement = document.getElementById('id_appointment_date');
+    
+    if (staffElement) {
+        staffElement.addEventListener('change', loadAvailableSlots);
+    }
+    if (dateElement) {
+        dateElement.addEventListener('change', loadAvailableSlots);
+    }
+    
+    // Navigation button handlers
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            } else {
+                alert('Please complete the current step before proceeding.');
+            }
+        });
+    }
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
+    }
+    
+    // Initialize
+    showStep(1);
+});
+
+function selectTimeSlot(time, display) {
+    document.getElementById('id_appointment_time').value = time;
+    
+    // Update button states
+    document.querySelectorAll('.slot-btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+    });
+    
+    event.target.classList.remove('btn-outline-primary');
+    event.target.classList.add('btn-primary');
+}
+</script>
+{% endblock %}

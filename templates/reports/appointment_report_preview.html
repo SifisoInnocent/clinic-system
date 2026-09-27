@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment Report - CCAMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-file-alt me-2"></i>
+                    Appointment Report
+                </h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-secondary">
+                        <i class="fas fa-print me-2"></i>
+                        Print Report
+                    </button>
+                    <a href="{% url 'reports:reports' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Back to Reports
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Report Period</h5>
+                            <p><strong>From:</strong> {{ date_from|date:"M d, Y" }}</p>
+                            <p><strong>To:</strong> {{ date_to|date:"M d, Y" }}</p>
+                            <p><strong>Report Type:</strong> {{ report_type|title }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Summary</h5>
+                            <p><strong>Total Appointments:</strong> {{ total_count }}</p>
+                            <p><strong>Generated:</strong> {% now "M d, Y H:i" %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Provider</th>
+                                    <th>Status</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }}</td>
+                                    <td>{{ appointment.appointment_time }}</td>
+                                    <td>{{ appointment.student.get_full_name|default:appointment.student.username }}</td>
+                                    <td>{{ appointment.staff.get_full_name|default:appointment.staff.username }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ appointment.status|default:'secondary' }}">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ appointment.reason|truncatechars:50 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No appointments found in this period</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,800 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>{% block title %}Campus Clinic Appointment Management System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Global and Custom CSS -->
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    
+    <script>
+        // Immediate Theme & Font Scale initializer to avoid flash
+        (function() {
+            const theme = localStorage.getItem('ccams_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            const fontScale = localStorage.getItem('ccams_font_scale') || 'font-md';
+            document.documentElement.className = fontScale;
+        })();
+    </script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="hero-bg"></div>
+    <div class="animated-blob"></div>
+    <div class="animated-blob-2"></div>
+
+    <!-- Navigation Bar -->
+    {% if not hide_navbar %}
+    <nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand brand-logo fw-bold d-flex align-items-center" href="{% url 'dashboard:dashboard' %}">
+                <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+                <span class="clinic-status-pill ms-3 d-none d-sm-inline-flex" id="clinicStatusPill" title="Campus Clinic Hours: Mon-Fri 08:00 - 17:00">
+                    <span class="pulse-dot-wrapper pulse-green" id="clinicPulseDot"><span class="pulse-ring"></span><span class="pulse-dot"></span></span>
+                    <span id="clinicStatusText">Open Now</span>
+                </span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-center">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" href="{% url 'appointments:appointment_list' %}">Appointments</a>
+                        </li>
+                        {% if user.is_student %}
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold" href="{% url 'appointments:appointment_book' %}">Book Appointment</a>
+                            </li>
+                        {% endif %}
+                        {% if user.is_staff_user %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Schedule
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'availability:availability_list' %}"><i class="fas fa-clock me-2"></i>My Working Hours</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:availability_add' %}"><i class="fas fa-plus-circle me-2"></i>Add Working Hours</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:availability_bulk_create' %}"><i class="fas fa-calendar-week me-2"></i>Bulk Setup</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_list' %}"><i class="fas fa-ban me-2"></i>Blocked Periods</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_create' %}"><i class="fas fa-calendar-times me-2"></i>Block Time</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if user.is_admin %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Users
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'accounts:user_list' %}"><i class="fas fa-users-cog me-2"></i>Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'accounts:user_create' %}"><i class="fas fa-user-plus me-2"></i>Create User</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Clinic
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_list' %}"><i class="fas fa-ban me-2"></i>Blocked Periods</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_create' %}"><i class="fas fa-calendar-times me-2"></i>Create Blocked Period</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Reports
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'reports:reports' %}"><i class="fas fa-file-invoice me-2"></i>Generate Reports</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'reports:statistics_report' %}"><i class="fas fa-chart-line me-2"></i>Statistics</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold" href="{% url 'audit:audit_log' %}">Audit Log</a>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Notification Center Bell -->
+                        <li class="nav-item dropdown position-relative">
+                            <a class="nav-link position-relative px-2" href="#" id="notifBellDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                                <i class="fas fa-bell fa-lg"></i>
+                                <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
+                                    0
+                                </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 notif-dropdown" aria-labelledby="notifBellDropdown">
+                                <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: var(--nav-bg, rgba(255,255,255,0.9));">
+                                    <h6 class="fw-bold mb-0" style="color: var(--text-primary);"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h6>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" onclick="markAllNotificationsReadDropdown()" title="Mark all read">
+                                        <small>Mark all read</small>
+                                    </button>
+                                </div>
+                                <div id="notifListDropdown" class="py-1" style="max-height: 320px; overflow-y: auto;">
+                                    <div class="text-center py-4 text-muted">
+                                        <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+                                    </div>
+                                </div>
+                                <div class="p-2 border-top text-center" style="background: var(--nav-bg, rgba(255,255,255,0.9));">
+                                    <a href="{% url 'notifications:notification_list' %}" class="small text-decoration-none fw-semibold">
+                                        View all notifications <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Universal Command Palette Trigger (Ctrl+K) -->
+                        <li class="nav-item d-none d-md-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-flex align-items-center gap-2" onclick="openCommandPalette()" title="Command Palette (Ctrl + K)">
+                                <i class="fas fa-search text-muted fa-xs"></i>
+                                <span class="small">Search</span>
+                                <kbd class="cmd-kbd">Ctrl K</kbd>
+                            </button>
+                        </li>
+
+                        <!-- Accessibility Controls -->
+                        <li class="nav-item d-flex align-items-center gap-1">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" id="themeToggleBtn" style="width: 34px; height: 34px;" title="Toggle High-Contrast / Dark Mode" onclick="toggleTheme()">
+                                <i class="fas fa-moon" id="themeIcon"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 small fw-bold" id="fontScaleBtn" style="font-size: 0.75rem;" title="Adjust Text Size (WCAG 2.1)" onclick="cycleFontSize()">
+                                <span id="fontScaleLabel">A</span>
+                            </button>
+                        </li>
+                        
+                        <li class="nav-item ms-lg-2">
+                            <div class="dropdown">
+                                <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'notifications:notification_list' %}"><i class="fas fa-bell me-2"></i>Notification Center</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" href="{% url 'accounts:login' %}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3 animate-up">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm rounded-4" role="alert">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                    {% elif message.tags == 'danger' or message.tags == 'error' %}
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle me-2"></i>
+                    {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Floating Glass Toasts Container (2026 Edition) -->
+    <div class="toast-container-custom" id="toastContainer"></div>
+
+    <!-- Universal 2026 Command Palette (Ctrl+K) -->
+    <div class="cmd-palette-backdrop" id="cmdPaletteBackdrop" onclick="handleCmdBackdropClick(event)">
+        <div class="cmd-palette-card" id="cmdPaletteCard">
+            <div class="cmd-search-wrapper">
+                <i class="fas fa-search text-primary"></i>
+                <input type="text" class="cmd-search-input" id="cmdSearchInput" placeholder="Type a command or jump to... (e.g. book, schedule, dark mode, users)" autocomplete="off">
+                <kbd class="cmd-kbd">ESC</kbd>
+            </div>
+            <div class="cmd-list" id="cmdList">
+                <!-- Group: Navigation -->
+                <div class="cmd-group-title">Navigation</div>
+                <a href="{% url 'dashboard:dashboard' %}" class="cmd-item" data-title="dashboard home portal overview">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-home"></i></span>
+                        <div>
+                            <div class="fw-semibold">Dashboard</div>
+                            <small class="text-muted">Return to main clinic overview</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                <a href="{% url 'appointments:appointment_list' %}" class="cmd-item" data-title="appointments list schedule calendar">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-calendar-check"></i></span>
+                        <div>
+                            <div class="fw-semibold">Appointments & Schedule</div>
+                            <small class="text-muted">Browse upcoming bookings & calendar</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                {% if user.is_student %}
+                <a href="{% url 'appointments:appointment_book' %}" class="cmd-item" data-title="book appointment nurse psychologist doctor consult">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon text-success"><i class="fas fa-plus-circle"></i></span>
+                        <div>
+                            <div class="fw-semibold">Book Appointment</div>
+                            <small class="text-muted">Reserve a consultation with clinic staff</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                {% endif %}
+                {% if user.is_staff_user %}
+                <a href="{% url 'availability:availability_list' %}" class="cmd-item" data-title="schedule hours working availability clinic">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-clock"></i></span>
+                        <div>
+                            <div class="fw-semibold">Manage Working Hours</div>
+                            <small class="text-muted">Configure clinic shifts and working hours</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                {% endif %}
+                {% if user.is_admin %}
+                <a href="{% url 'accounts:user_list' %}" class="cmd-item" data-title="users manage accounts students staff psychologists admins">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-users-cog"></i></span>
+                        <div>
+                            <div class="fw-semibold">Manage Users</div>
+                            <small class="text-muted">Create, edit, and audit system user accounts</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                <a href="{% url 'reports:reports' %}" class="cmd-item" data-title="reports export statistics excel pdf analytics summary">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-chart-line"></i></span>
+                        <div>
+                            <div class="fw-semibold">Reports & Analytics</div>
+                            <small class="text-muted">Generate attendance & operational summaries</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                <a href="{% url 'audit:audit_log' %}" class="cmd-item" data-title="audit log security activity tracking">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-shield-alt"></i></span>
+                        <div>
+                            <div class="fw-semibold">Audit Logs</div>
+                            <small class="text-muted">Review authentication & clinical system logs</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                {% endif %}
+                <a href="{% url 'notifications:notification_list' %}" class="cmd-item" data-title="notifications notices alerts unread inbox">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-bell"></i></span>
+                        <div>
+                            <div class="fw-semibold">Notification Center</div>
+                            <small class="text-muted">View reminders, cancellations & clinic updates</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                <a href="{% url 'accounts:profile' %}" class="cmd-item" data-title="profile account settings password details security">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-user-circle"></i></span>
+                        <div>
+                            <div class="fw-semibold">My Profile</div>
+                            <small class="text-muted">View contact information and security settings</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+
+                <!-- Group: Quick Actions -->
+                <div class="cmd-group-title">Quick Actions</div>
+                <div class="cmd-item" onclick="toggleTheme(); closeCommandPalette();" data-title="dark mode light mode theme toggle high contrast color scheme">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-moon"></i></span>
+                        <div>
+                            <div class="fw-semibold">Toggle Dark / Light Theme</div>
+                            <small class="text-muted">Switch high-contrast theme</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-light text-dark border">Theme</span>
+                </div>
+                <div class="cmd-item" onclick="cycleFontSize(); closeCommandPalette();" data-title="font size text scale accessibility zoom text size large">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-text-height"></i></span>
+                        <div>
+                            <div class="fw-semibold">Adjust Font Sizing (WCAG 2.1)</div>
+                            <small class="text-muted">Cycle text scaling: A-, A, A+, A++</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-light text-dark border">Zoom</span>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="cmd-item" onclick="markAllNotificationsReadDropdown(); closeCommandPalette(); showToast('success', 'Notifications', 'All notifications marked as read');" data-title="mark all read notifications clear alerts">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon"><i class="fas fa-check-double"></i></span>
+                        <div>
+                            <div class="fw-semibold">Mark All Notifications Read</div>
+                            <small class="text-muted">Clear unread notifications counter</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-light text-dark border">Action</span>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="cmd-item text-danger" data-title="logout sign out exit quit">
+                    <div class="d-flex align-items-center">
+                        <span class="cmd-item-icon text-danger" style="background: rgba(220,53,69,0.1);"><i class="fas fa-sign-out-alt"></i></span>
+                        <div>
+                            <div class="fw-semibold">Sign Out</div>
+                            <small class="text-muted">End your CCAMS session securely</small>
+                        </div>
+                    </div>
+                    <kbd class="cmd-kbd">↵</kbd>
+                </a>
+                {% endif %}
+            </div>
+            <div class="cmd-footer">
+                <span><i class="fas fa-arrow-up fa-xs"></i> <i class="fas fa-arrow-down fa-xs me-1"></i> to navigate</span>
+                <span><kbd class="cmd-kbd">↵</kbd> to select</span>
+                <span><kbd class="cmd-kbd">ESC</kbd> to close</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Dock (Phones & Tablets) -->
+    {% if user.is_authenticated %}
+    <div class="mobile-bottom-dock no-print">
+        <a href="{% url 'dashboard:dashboard' %}" class="mobile-dock-btn" title="Dashboard">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'appointments:appointment_list' %}" class="mobile-dock-btn" title="Appointments">
+            <i class="fas fa-calendar-check"></i>
+            <span>Schedule</span>
+        </a>
+        {% if user.is_student %}
+        <a href="{% url 'appointments:appointment_book' %}" class="mobile-dock-btn text-primary fw-bold" title="Book">
+            <i class="fas fa-plus-circle fa-lg"></i>
+            <span>Book</span>
+        </a>
+        {% elif user.is_staff_user %}
+        <a href="{% url 'availability:availability_list' %}" class="mobile-dock-btn text-primary fw-bold" title="Hours">
+            <i class="fas fa-clock fa-lg"></i>
+            <span>Hours</span>
+        </a>
+        {% elif user.is_admin %}
+        <a href="{% url 'reports:reports' %}" class="mobile-dock-btn text-primary fw-bold" title="Reports">
+            <i class="fas fa-chart-line fa-lg"></i>
+            <span>Reports</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'notifications:notification_list' %}" class="mobile-dock-btn position-relative" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span>Notices</span>
+            <span id="mobileNotifBadge" class="mobile-dock-badge d-none">0</span>
+        </a>
+        <button type="button" class="mobile-dock-btn border-0 bg-transparent" onclick="openCommandPalette()" title="Command Menu">
+            <i class="fas fa-bars"></i>
+            <span>Menu</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0 text-secondary" style="font-size: 13px;">&copy; 2026 Campus Clinic Appointment Management System (CCAMS). All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/custom.js' %}"></script>
+    
+    <script>
+        // Theme Switcher Logic
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('ccams_theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if(icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+            }
+        }
+
+        // Font Scaler Logic
+        const fontScales = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+        const fontLabels = {'font-sm': 'A-', 'font-md': 'A', 'font-lg': 'A+', 'font-xl': 'A++'};
+        
+        function cycleFontSize() {
+            const current = localStorage.getItem('ccams_font_scale') || 'font-md';
+            const nextIdx = (fontScales.indexOf(current) + 1) % fontScales.length;
+            const nextScale = fontScales[nextIdx];
+            document.documentElement.className = nextScale;
+            localStorage.setItem('ccams_font_scale', nextScale);
+            updateFontLabel(nextScale);
+        }
+
+        function updateFontLabel(scale) {
+            const label = document.getElementById('fontScaleLabel');
+            if(label) label.innerText = fontLabels[scale] || 'A';
+        }
+
+        // Notification Center Logic
+        function loadNotifications() {
+            const notifBadge = document.getElementById('notifBadge');
+            const notifList = document.getElementById('notifListDropdown');
+            if(!notifList) return;
+
+            fetch('{% url "notifications:api_recent" %}')
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        if(data.unread_count > 0 && notifBadge) {
+                            notifBadge.innerText = data.unread_count > 99 ? '99+' : data.unread_count;
+                            notifBadge.classList.remove('d-none');
+                        } else if(notifBadge) {
+                            notifBadge.classList.add('d-none');
+                        }
+
+                        if(data.notifications.length === 0) {
+                            notifList.innerHTML = '<div class="text-center py-4 text-muted small"><i class="fas fa-bell-slash me-1"></i>No notifications</div>';
+                        } else {
+                            let html = '';
+                            data.notifications.slice(0, 5).forEach(n => {
+                                html += `
+                                <div class="px-3 py-2 border-bottom notif-item ${!n.is_read ? 'bg-primary bg-opacity-10' : ''}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">${n.purpose_display}</span>
+                                        <small class="text-muted" style="font-size: 0.65rem;">${n.time_ago}</small>
+                                    </div>
+                                    <div class="small fw-semibold text-truncate mb-1" style="max-width: 280px; color: var(--text-primary);">${n.subject || n.purpose_display}</div>
+                                    <p class="text-secondary small mb-1" style="font-size: 0.75rem; line-height: 1.25;">${n.message}</p>
+                                    ${n.appointment_id ? `<a href="/appointments/${n.appointment_id}/" class="text-primary text-decoration-none small fw-semibold" style="font-size: 0.7rem;"><i class="fas fa-arrow-right me-1"></i>View details</a>` : ''}
+                                </div>`;
+                            });
+                            notifList.innerHTML = html;
+                        }
+                    }
+                })
+                .catch(() => {
+                    if(notifList) notifList.innerHTML = '<div class="text-center py-3 text-muted small">Notifications unavailable</div>';
+                });
+        }
+
+        function markAllNotificationsReadDropdown() {
+            fetch('{% url "notifications:api_mark_all_read" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            }).then(() => {
+                loadNotifications();
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // ==========================================
+        // 2026 Live Clinic Status Logic
+        // ==========================================
+        function updateClinicStatus() {
+            const pill = document.getElementById('clinicStatusPill');
+            const text = document.getElementById('clinicStatusText');
+            const dot = document.getElementById('clinicPulseDot');
+            if (!pill || !text || !dot) return;
+
+            const now = new Date();
+            const day = now.getDay(); // 0 = Sun, 6 = Sat
+            const hour = now.getHours();
+            const isWeekday = (day >= 1 && day <= 5);
+            const isOpen = isWeekday && (hour >= 8 && hour < 17);
+
+            if (isOpen) {
+                dot.className = 'pulse-dot-wrapper pulse-green';
+                text.innerText = 'Open Now (Closes 17:00)';
+                pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+            } else {
+                dot.className = 'pulse-dot-wrapper pulse-amber';
+                text.innerText = isWeekday ? 'Closed (Opens 08:00)' : 'Closed for Weekend';
+                pill.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+            }
+        }
+
+        // ==========================================
+        // 2026 Floating Glass Toast Notification System
+        // ==========================================
+        function showToast(type, title, message, durationMs = 5000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'glass-toast';
+
+            const iconMap = {
+                'success': '<i class="fas fa-check-circle text-success fa-lg"></i>',
+                'error': '<i class="fas fa-exclamation-circle text-danger fa-lg"></i>',
+                'danger': '<i class="fas fa-exclamation-circle text-danger fa-lg"></i>',
+                'warning': '<i class="fas fa-exclamation-triangle text-warning fa-lg"></i>',
+                'info': '<i class="fas fa-info-circle text-primary fa-lg"></i>'
+            };
+
+            const iconHtml = iconMap[type] || iconMap['info'];
+
+            toast.innerHTML = `
+                <div class="mt-1">${iconHtml}</div>
+                <div class="flex-grow-1 me-2">
+                    <div class="fw-bold small mb-1" style="color: var(--text-primary);">${title || 'Notification'}</div>
+                    <div class="text-secondary small" style="font-size: 0.8rem; line-height: 1.3;">${message}</div>
+                </div>
+                <button type="button" class="btn-close btn-close-sm" style="font-size: 0.65rem;" onclick="this.closest('.glass-toast').remove()"></button>
+                <div class="glass-toast-progress">
+                    <div class="glass-toast-progress-bar"></div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+            // Trigger transition
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+                const bar = toast.querySelector('.glass-toast-progress-bar');
+                if (bar) {
+                    bar.style.transitionDuration = `${durationMs}ms`;
+                    bar.style.width = '0%';
+                }
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 350);
+            }, durationMs);
+        }
+
+        // ==========================================
+        // 2026 Universal Command Palette (Ctrl+K)
+        // ==========================================
+        let cmdSelectedIndex = 0;
+
+        function openCommandPalette() {
+            const backdrop = document.getElementById('cmdPaletteBackdrop');
+            const input = document.getElementById('cmdSearchInput');
+            if (!backdrop || !input) return;
+
+            backdrop.classList.add('active');
+            input.value = '';
+            filterCommandList('');
+            input.focus();
+        }
+
+        function closeCommandPalette() {
+            const backdrop = document.getElementById('cmdPaletteBackdrop');
+            if (backdrop) backdrop.classList.remove('active');
+        }
+
+        function handleCmdBackdropClick(e) {
+            if (e.target.id === 'cmdPaletteBackdrop') {
+                closeCommandPalette();
+            }
+        }
+
+        function filterCommandList(query) {
+            const q = query.toLowerCase().trim();
+            const items = document.querySelectorAll('#cmdList .cmd-item');
+            const titles = document.querySelectorAll('#cmdList .cmd-group-title');
+            let visibleCount = 0;
+
+            items.forEach((item) => {
+                const titleData = (item.getAttribute('data-title') || '').toLowerCase();
+                const text = item.innerText.toLowerCase();
+                const matches = !q || titleData.includes(q) || text.includes(q);
+
+                if (matches) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+                item.classList.remove('selected');
+            });
+
+            // Update visible group titles
+            titles.forEach(title => {
+                let next = title.nextElementSibling;
+                let hasVisibleSibling = false;
+                while (next && !next.classList.contains('cmd-group-title')) {
+                    if (next.style.display !== 'none') {
+                        hasVisibleSibling = true;
+                        break;
+                    }
+                    next = next.nextElementSibling;
+                }
+                title.style.display = hasVisibleSibling ? 'block' : 'none';
+            });
+
+            cmdSelectedIndex = 0;
+            const visibleItems = getVisibleCmdItems();
+            if (visibleItems.length > 0) {
+                visibleItems[0].classList.add('selected');
+            }
+        }
+
+        function getVisibleCmdItems() {
+            return Array.from(document.querySelectorAll('#cmdList .cmd-item')).filter(el => el.style.display !== 'none');
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            const backdrop = document.getElementById('cmdPaletteBackdrop');
+            const isOpen = backdrop && backdrop.classList.contains('active');
+
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                if (isOpen) {
+                    closeCommandPalette();
+                } else {
+                    openCommandPalette();
+                }
+            } else if (isOpen) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeCommandPalette();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const visible = getVisibleCmdItems();
+                    if (visible.length === 0) return;
+                    visible[cmdSelectedIndex]?.classList.remove('selected');
+                    cmdSelectedIndex = (cmdSelectedIndex + 1) % visible.length;
+                    visible[cmdSelectedIndex]?.classList.add('selected');
+                    visible[cmdSelectedIndex]?.scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const visible = getVisibleCmdItems();
+                    if (visible.length === 0) return;
+                    visible[cmdSelectedIndex]?.classList.remove('selected');
+                    cmdSelectedIndex = (cmdSelectedIndex - 1 + visible.length) % visible.length;
+                    visible[cmdSelectedIndex]?.classList.add('selected');
+                    visible[cmdSelectedIndex]?.scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const visible = getVisibleCmdItems();
+                    if (visible[cmdSelectedIndex]) {
+                        visible[cmdSelectedIndex].click();
+                    }
+                }
+            }
+        });
+
+        document.getElementById('cmdSearchInput')?.addEventListener('input', (e) => {
+            filterCommandList(e.target.value);
+        });
+
+        // Sync mobile badge with desktop badge
+        const originalLoadNotifications = window.loadNotifications || loadNotifications;
+        window.loadNotifications = function() {
+            const notifBadge = document.getElementById('notifBadge');
+            const mobileBadge = document.getElementById('mobileNotifBadge');
+            const notifList = document.getElementById('notifListDropdown');
+
+            fetch('{% url "notifications:api_recent" %}')
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        const countText = data.unread_count > 99 ? '99+' : data.unread_count;
+                        if(data.unread_count > 0) {
+                            if(notifBadge) {
+                                notifBadge.innerText = countText;
+                                notifBadge.classList.remove('d-none');
+                            }
+                            if(mobileBadge) {
+                                mobileBadge.innerText = countText;
+                                mobileBadge.classList.remove('d-none');
+                            }
+                        } else {
+                            if(notifBadge) notifBadge.classList.add('d-none');
+                            if(mobileBadge) mobileBadge.classList.add('d-none');
+                        }
+
+                        if(notifList) {
+                            if(data.notifications.length === 0) {
+                                notifList.innerHTML = '<div class="text-center py-4 text-muted small"><i class="fas fa-bell-slash me-1"></i>No notifications</div>';
+                            } else {
+                                let html = '';
+                                data.notifications.slice(0, 5).forEach(n => {
+                                    html += `
+                                    <div class="px-3 py-2 border-bottom notif-item ${!n.is_read ? 'bg-primary bg-opacity-10' : ''}">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">${n.purpose_display}</span>
+                                            <small class="text-muted" style="font-size: 0.65rem;">${n.time_ago}</small>
+                                        </div>
+                                        <div class="small fw-semibold text-truncate mb-1" style="max-width: 280px; color: var(--text-primary);">${n.subject || n.purpose_display}</div>
+                                        <p class="text-secondary small mb-1" style="font-size: 0.75rem; line-height: 1.25;">${n.message}</p>
+                                        ${n.appointment_id ? `<a href="/appointments/${n.appointment_id}/" class="text-primary text-decoration-none small fw-semibold" style="font-size: 0.7rem;"><i class="fas fa-arrow-right me-1"></i>View details</a>` : ''}
+                                    </div>`;
+                                });
+                                notifList.innerHTML = html;
+                            }
+                        }
+                    }
+                })
+                .catch(() => {
+                    if(notifList) notifList.innerHTML = '<div class="text-center py-3 text-muted small">Notifications unavailable</div>';
+                });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'light');
+            updateFontLabel(localStorage.getItem('ccams_font_scale') || 'font-md');
+            updateClinicStatus();
+            setInterval(updateClinicStatus, 60000); // Check clinic hours every minute
+
+            {% if user.is_authenticated %}
+            loadNotifications();
+            {% endif %}
+
+            // Transform Django rendered alerts into 2026 Floating Glass Toasts
+            document.querySelectorAll('.alert-dismissible').forEach(alert => {
+                let type = 'info';
+                if (alert.classList.contains('alert-success')) type = 'success';
+                else if (alert.classList.contains('alert-danger') || alert.classList.contains('alert-error')) type = 'error';
+                else if (alert.classList.contains('alert-warning')) type = 'warning';
+                
+                const rawText = alert.innerText.replace('×', '').trim();
+                if (rawText) {
+                    showToast(type, type.toUpperCase(), rawText);
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

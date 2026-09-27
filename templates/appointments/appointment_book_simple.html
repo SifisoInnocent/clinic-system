@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | Book Appointment</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: modern mix -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .appointment-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .provider-card {
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 1.5rem;
+            min-height: 200px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .provider-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+            border-color: rgba(30, 42, 94, 0.3);
+        }
+
+        .provider-card.selected {
+            border-color: #1e2a5e;
+            background: rgba(30, 42, 94, 0.1);
+            box-shadow: 0 20px 40px -15px rgba(30, 42, 94, 0.2);
+        }
+
+        .provider-card .card-title {
+            color: #1e2a5e;
+            font-weight: 700;
+        }
+
+        .provider-card.selected .card-title {
+            color: #1e2a5e;
+        }
+
+        .form-control, .form-select {
+            border-radius: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            padding: 0.8rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #1e2a5e;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 0.2rem rgba(30, 42, 94, 0.25);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1e2a5e;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-indicator {
+            margin-bottom: 2rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-step-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1rem;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active .progress-step-number {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 42, 94, 0.3);
+        }
+
+        .progress-step.completed .progress-step-number {
+            background: linear-gradient(95deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .progress-step-text {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .progress-step.active .progress-step-text {
+            color: #1e2a5e;
+            font-weight: 600;
+        }
+
+        .progress-step.completed .progress-step-text {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold" href="{% url 'dashboard:dashboard' %}">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold active" href="{% url 'appointments:appointment_list' %}">Appointments</a></li>
+                {% if not is_student %}
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'availability:availability_list' %}">Schedule</a></li>
+                {% endif %}
+                {% if request.user.is_admin %}
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'accounts:user_list' %}">Users</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'reports:reports' %}">Reports</a></li>
+                {% endif %}
+                <li class="nav-item ms-lg-2">
+                    <div class="dropdown">
+                        <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container pt-5 pb-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5 animate-up">
+        <div class="badge bg-light text-dark rounded-pill px-4 py-2 mb-3 shadow-sm">
+            <i class="fas fa-calendar-plus me-2"></i>Student Portal
+        </div>
+        <h1 class="hero-title mb-3">Book Appointment</h1>
+        <p class="text-secondary-emphasis fs-5" style="color: #2d3a4a;">Schedule your healthcare appointment with ease</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="appointment-card p-4 animate-up" style="animation-delay: 0.1s;">
+                <!-- Progress Indicator -->
+                <div class="progress-indicator mb-4">
+                    <div class="progress-step active" data-step="1">
+                        <div class="progress-step-number">1</div>
+                        <div class="progress-step-text">Choose Provider</div>
+                    </div>
+                    <div class="progress-step" data-step="2">
+                        <div class="progress-step-number">2</div>
+                        <div class="progress-step-text">Select Date & Time</div>
+                    </div>
+                    <div class="progress-step" data-step="3">
+                        <div class="progress-step-number">3</div>
+                        <div class="progress-step-text">Add Reason</div>
+                    </div>
+                    <div class="progress-step" data-step="4">
+                        <div class="progress-step-number">4</div>
+                        <div class="progress-step-text">Confirm Booking</div>
+                    </div>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="bookingForm">
+                    {% csrf_token %}
+                    
+                    <!-- Provider Type Selection -->
+                    <div class="mb-4">
+                        <label class="form-label mb-3">Choose Your Healthcare Provider</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card provider-card" data-provider-type="nurse">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <i class="fas fa-user-nurse fa-3x" style="color: #1e2a5e;"></i>
+                                        </div>
+                                        <h5 class="card-title">Nurse</h5>
+                                        <p class="card-text text-secondary">General health check-ups, vaccinations, minor injuries, and basic medical care</p>
+                                        <div class="provider-count">
+                                            <small class="text-success">{{ available_nurses|length }} nurses available</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card provider-card" data-provider-type="psychologist">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <i class="fas fa-brain fa-3x" style="color: #10b981;"></i>
+                                        </div>
+                                        <h5 class="card-title">Psychologist</h5>
+                                        <p class="card-text text-secondary">Mental health support, counseling, stress management, and emotional well-being</p>
+                                        <div class="provider-count">
+                                            <small class="text-success">{{ available_psychologists|length }} psychologists available</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{ form.provider_type.as_hidden }}
+                        {% if form.provider_type.errors %}
+                            <div class="text-danger">
+                                {% for error in form.provider_type.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Staff Selection -->
+                    <div class="mb-4">
+                        <label for="{{ form.staff.id_for_label }}" class="form-label">Select Provider</label>
+                        {{ form.staff }}
+                        {% if form.staff.errors %}
+                            <div class="text-danger">
+                                {% for error in form.staff.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Appointment Date -->
+                    <div class="mb-4">
+                        <label for="{{ form.appointment_date.id_for_label }}" class="form-label">Appointment Date</label>
+                        {{ form.appointment_date }}
+                        {% if form.appointment_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form.appointment_date.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Appointment Time & Available Slots -->
+                    <div class="mb-4">
+                        <label for="{{ form.appointment_time.id_for_label }}" class="form-label">Available Time Slots</label>
+                        <div id="slotsLoading" class="small text-muted d-none mb-2">
+                            <span class="spinner-border spinner-border-sm me-1 text-primary"></span> Checking provider availability...
+                        </div>
+                        <div id="slotChipsContainer" class="d-flex flex-wrap gap-2 mb-2">
+                            <!-- Clickable time chips populated dynamically -->
+                        </div>
+                        <div id="noSlotsMessage" class="alert alert-light border py-2 px-3 small d-none text-muted">
+                            <i class="fas fa-info-circle me-1 text-primary"></i> No available slots for this date/provider (or weekends/past hours). Try selecting a different date or provider.
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label small text-secondary">Selected Time</label>
+                            {{ form.appointment_time }}
+                        </div>
+                        {% if form.appointment_time.errors %}
+                            <div class="text-danger">
+                                {% for error in form.appointment_time.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Reason -->
+                    <div class="mb-4">
+                        <label for="{{ form.reason.id_for_label }}" class="form-label">Reason for Appointment</label>
+                        <div class="reason-templates mb-3">
+                            <small class="text-secondary">Common reasons:</small>
+                            <div class="btn-group flex-wrap" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm reason-template rounded-pill" data-reason="Flu symptoms - fever, cough, body aches">Flu symptoms</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm reason-template rounded-pill" data-reason="Head injury or trauma check-up">Head injury</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm reason-template rounded-pill" data-reason="Mental health support - stress, anxiety, depression">Mental health</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm reason-template rounded-pill" data-reason="Regular check-up and health screening">Check-up</button>
+                            </div>
+                        </div>
+                        {{ form.reason }}
+                        <div class="form-text">
+                            <small class="text-secondary">Please describe your symptoms or reason for visit in detail (minimum 10 characters)</small>
+                            <div class="character-counter">
+                                <small><span id="charCount">0</span>/500 characters</small>
+                            </div>
+                        </div>
+                        {% if form.reason.errors %}
+                            <div class="text-danger">
+                                {% for error in form.reason.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-flex gap-3 justify-content-between">
+                        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Dashboard
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="clearForm()">
+                                <i class="fas fa-redo me-2"></i>
+                                Clear Form
+                            </button>
+                            <button type="submit" class="btn btn-primary-gradient px-4 text-white rounded-pill" id="submitBtn">
+                                <i class="fas fa-calendar-plus me-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Staff data from database
+    const staffData = {
+        nurses: [
+            {% for nurse in nurses %}
+            {
+                id: {{ nurse.id }},
+                name: "{{ nurse.get_full_name|default:nurse.username }}",
+                email: "{{ nurse.email }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        psychologists: [
+            {% for psychologist in psychologists %}
+            {
+                id: {{ psychologist.id }},
+                name: "{{ psychologist.get_full_name|default:psychologist.username }}",
+                email: "{{ psychologist.email }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    // Provider card selection
+    const providerCards = document.querySelectorAll('.provider-card');
+    const providerTypeInput = document.getElementById('id_provider_type');
+    const staffSelect = document.getElementById('id_staff');
+    
+    providerCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            providerCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Set the provider type
+            const providerType = this.dataset.providerType;
+            providerTypeInput.value = providerType;
+            
+            // Update staff dropdown
+            updateStaffList(providerType);
+            updateProgress();
+        });
+    });
+    
+    function updateStaffList(providerType) {
+        // Clear current options
+        staffSelect.innerHTML = '<option value="">Select Provider</option>';
+        
+        if (providerType === 'nurse') {
+            staffData.nurses.forEach(staff => {
+                staffSelect.innerHTML += `<option value="${staff.id}">${staff.name}</option>`;
+            });
+        } else if (providerType === 'psychologist') {
+            staffData.psychologists.forEach(staff => {
+                staffSelect.innerHTML += `<option value="${staff.id}">${staff.name}</option>`;
+            });
+        }
+        loadAvailableSlots();
+    }
+    
+    // Appointment date input & slot loading
+    const dateInput = document.getElementById('id_appointment_date');
+    const timeInput = document.getElementById('id_appointment_time');
+    
+    if (dateInput) {
+        // Enforce minimum date as today
+        dateInput.setAttribute('min', '{{ today|date:"Y-m-d" }}');
+        dateInput.addEventListener('change', function() {
+            loadAvailableSlots();
+            updateProgress();
+        });
+    }
+    
+    if (staffSelect) {
+        staffSelect.addEventListener('change', function() {
+            loadAvailableSlots();
+            updateProgress();
+        });
+    }
+    
+    function loadAvailableSlots() {
+        const staffId = staffSelect ? staffSelect.value : '';
+        const dateVal = dateInput ? dateInput.value : '';
+        const container = document.getElementById('slotChipsContainer');
+        const loading = document.getElementById('slotsLoading');
+        const noSlots = document.getElementById('noSlotsMessage');
+        
+        if (!container) return;
+        
+        if (!staffId || !dateVal) {
+            container.innerHTML = '<span class="text-muted small">Select both a provider and a date to view available time slots.</span>';
+            if (noSlots) noSlots.classList.add('d-none');
+            if (loading) loading.classList.add('d-none');
+            return;
+        }
+        
+        if (loading) loading.classList.remove('d-none');
+        if (noSlots) noSlots.classList.add('d-none');
+        container.innerHTML = '';
+        
+        fetch(`/appointments/api/available-slots/?staff_id=${staffId}&date=${dateVal}`)
+            .then(res => res.json())
+            .then(data => {
+                if (loading) loading.classList.add('d-none');
+                container.innerHTML = '';
+                
+                if (data.slots && data.slots.length > 0) {
+                    data.slots.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-primary btn-sm rounded-pill px-3 slot-chip';
+                        btn.textContent = slot.display;
+                        btn.dataset.time = slot.time;
+                        
+                        // Check if currently matches
+                        if (timeInput && timeInput.value === slot.time) {
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-primary', 'text-white');
+                        }
+                        
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('.slot-chip').forEach(c => {
+                                c.classList.remove('btn-primary', 'text-white');
+                                c.classList.add('btn-outline-primary');
+                            });
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-primary', 'text-white');
+                            if (timeInput) {
+                                timeInput.value = slot.time;
+                            }
+                            updateProgress();
+                        });
+                        
+                        container.appendChild(btn);
+                    });
+                } else {
+                    if (noSlots) noSlots.classList.remove('d-none');
+                }
+            })
+            .catch(err => {
+                if (loading) loading.classList.add('d-none');
+                console.error('Error fetching slots:', err);
+            });
+    }
+    
+    // Pre-select provider type if already set
+    const preselectedType = providerTypeInput.value;
+    if (preselectedType) {
+        const preselectedCard = document.querySelector(`[data-provider-type="${preselectedType}"]`);
+        if (preselectedCard) {
+            preselectedCard.click();
+        }
+    }
+    
+    // Reason template functionality
+    const reasonTemplates = document.querySelectorAll('.reason-template');
+    const reasonTextarea = document.getElementById('id_reason');
+    const charCount = document.getElementById('charCount');
+    
+    reasonTemplates.forEach(template => {
+        template.addEventListener('click', function() {
+            const reason = this.dataset.reason;
+            reasonTextarea.value = reason;
+            updateCharCount();
+            updateProgress();
+        });
+    });
+    
+    // Character counter
+    function updateCharCount() {
+        const length = reasonTextarea.value.length;
+        charCount.textContent = length;
+        
+        if (length > 500) {
+            charCount.parentElement.classList.add('text-danger');
+            charCount.parentElement.classList.remove('text-muted');
+        } else if (length < 10) {
+            charCount.parentElement.classList.add('text-warning');
+            charCount.parentElement.classList.remove('text-muted');
+        } else {
+            charCount.parentElement.classList.remove('text-danger', 'text-warning');
+            charCount.parentElement.classList.add('text-muted');
+        }
+    }
+    
+    reasonTextarea.addEventListener('input', updateCharCount);
+    
+    // Form validation and progress tracking
+    function updateProgress() {
+        const steps = document.querySelectorAll('.progress-step');
+        let currentStep = 1;
+        
+        if (providerTypeInput.value) currentStep = 2;
+        if (staffSelect.value) currentStep = 3;
+        if (reasonTextarea.value.length >= 10) currentStep = 4;
+        
+        steps.forEach((step, index) => {
+            const stepNumber = index + 1;
+            step.classList.remove('active', 'completed');
+            
+            if (stepNumber < currentStep) {
+                step.classList.add('completed');
+            } else if (stepNumber === currentStep) {
+                step.classList.add('active');
+            }
+        });
+    }
+    
+    // Update progress on form changes
+    providerTypeInput.addEventListener('change', updateProgress);
+    staffSelect.addEventListener('change', updateProgress);
+    reasonTextarea.addEventListener('input', updateProgress);
+    
+    // Form submission validation
+    const bookingForm = document.getElementById('bookingForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    bookingForm.addEventListener('submit', function(e) {
+        // Validate reason length
+        if (reasonTextarea.value.length < 10) {
+            e.preventDefault();
+            alert('Please provide at least 10 characters for the reason of your appointment.');
+            reasonTextarea.focus();
+            return;
+        }
+        
+        // Validate provider selection
+        if (!providerTypeInput.value) {
+            e.preventDefault();
+            alert('Please select a provider type.');
+            return;
+        }
+        
+        // Validate staff selection
+        if (!staffSelect.value) {
+            e.preventDefault();
+            alert('Please select a specific healthcare provider.');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Booking...';
+    });
+});
+
+// Clear form function
+function clearForm() {
+    if (confirm('Are you sure you want to clear all form data?')) {
+        document.getElementById('bookingForm').reset();
+        document.querySelectorAll('.provider-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.getElementById('charCount').textContent = '0';
+        location.reload();
+    }
+}
+
+// Add smooth animations on scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.animate-up').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'all 0.6s ease-out';
+    observer.observe(el);
+});
+</script>
+</body>
+</html>

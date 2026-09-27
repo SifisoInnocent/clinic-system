@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | Staff Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% load static %}
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('ccams_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            const fontScale = localStorage.getItem('ccams_font_scale') || 'font-md';
+            document.documentElement.className = fontScale;
+        })();
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1e2a5e, #2c3e6e);
+        }
+        
+        .appointment-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e2a5e, #2c3e6e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold d-flex align-items-center" href="{% url 'dashboard:dashboard' %}">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+            <span class="clinic-status-pill ms-3 d-none d-sm-inline-flex" id="clinicStatusPill" title="Campus Clinic Hours: Mon-Fri 08:00 - 17:00">
+                <span class="pulse-dot-wrapper pulse-green" id="clinicPulseDot"><span class="pulse-ring"></span><span class="pulse-dot"></span></span>
+                <span id="clinicStatusText">Open Now</span>
+            </span>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-center">
+                <li class="nav-item"><a class="nav-link fw-semibold active" href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'appointments:appointment_list' %}">Appointments</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'availability:availability_list' %}">Schedule</a></li>
+                
+                <!-- Command Palette Trigger (Ctrl+K) -->
+                <li class="nav-item d-none d-md-block">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-flex align-items-center gap-2" onclick="openCommandPalette()" title="Command Palette (Ctrl + K)">
+                        <i class="fas fa-search text-muted fa-xs"></i>
+                        <span class="small">Search</span>
+                        <kbd class="cmd-kbd">Ctrl K</kbd>
+                    </button>
+                </li>
+
+                <!-- Notification Center Bell -->
+                <li class="nav-item dropdown position-relative">
+                    <a class="nav-link position-relative px-2" href="#" id="notifBellDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
+                            0
+                        </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 notif-dropdown" aria-labelledby="notifBellDropdown">
+                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: var(--nav-bg, rgba(255,255,255,0.9));">
+                            <h6 class="fw-bold mb-0" style="color: var(--text-primary);"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h6>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" onclick="markAllNotificationsReadDropdown()" title="Mark all read">
+                                <small>Mark all read</small>
+                            </button>
+                        </div>
+                        <div id="notifListDropdown" class="py-1" style="max-height: 320px; overflow-y: auto;">
+                            <div class="text-center py-4 text-muted">
+                                <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+                            </div>
+                        </div>
+                        <div class="p-2 border-top text-center" style="background: var(--nav-bg, rgba(255,255,255,0.9));">
+                            <a href="{% url 'notifications:notification_list' %}" class="small text-decoration-none fw-semibold">
+                                View all notifications <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Accessibility Controls -->
+                <li class="nav-item d-flex align-items-center gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" id="themeToggleBtn" style="width: 34px; height: 34px;" title="Toggle High-Contrast / Dark Mode" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 small fw-bold" id="fontScaleBtn" style="font-size: 0.75rem;" title="Adjust Text Size (WCAG 2.1)" onclick="cycleFontSize()">
+                        <span id="fontScaleLabel">A</span>
+                    </button>
+                </li>
+
+                <li class="nav-item ms-lg-2">
+                    <div class="dropdown">
+                        <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'notifications:notification_list' %}"><i class="fas fa-bell me-2"></i>Notification Center</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container pt-5 pb-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5 animate-up">
+        <div class="badge bg-light text-dark rounded-pill px-4 py-2 mb-3 shadow-sm">
+            <i class="fas fa-user-nurse me-2"></i>Staff Portal
+        </div>
+        <h1 class="hero-title mb-3">Welcome back, <span style="color:#2c3e6e;">{{ user.get_full_name|default:user.username }}</span></h1>
+        <p class="text-secondary-emphasis fs-5" style="color: #2d3a4a;">{{ request.user.get_role_display }} Dashboard - Manage your appointments and schedule</p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{% url 'availability:availability_list' %}" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white">
+                <i class="fas fa-clock me-2"></i>Manage Schedule
+            </a>
+            <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                All Appointments <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Monthly Statistics -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-2 animate-up" style="animation-delay: 0.1s;">
+            <div class="stat-card p-3 text-center">
+                <div class="mb-2">
+                    <i class="fas fa-calendar-alt fa-2x" style="color: #17a2b8;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color: #17a2b8;">{{ total_month }}</h4>
+                <p class="text-secondary mb-0 small">Monthly Total</p>
+            </div>
+        </div>
+        <div class="col-md-2 animate-up" style="animation-delay: 0.2s;">
+            <div class="stat-card p-3 text-center">
+                <div class="mb-2">
+                    <i class="fas fa-clock fa-2x" style="color: #ffc107;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color: #ffc107;">{{ pending_month }}</h4>
+                <p class="text-secondary mb-0 small">Pending</p>
+            </div>
+        </div>
+        <div class="col-md-2 animate-up" style="animation-delay: 0.3s;">
+            <div class="stat-card p-3 text-center">
+                <div class="mb-2">
+                    <i class="fas fa-check fa-2x" style="color: #007bff;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color: #007bff;">{{ confirmed_month }}</h4>
+                <p class="text-secondary mb-0 small">Confirmed</p>
+            </div>
+        </div>
+        <div class="col-md-2 animate-up" style="animation-delay: 0.4s;">
+            <div class="stat-card p-3 text-center">
+                <div class="mb-2">
+                    <i class="fas fa-check-circle fa-2x" style="color: #28a745;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color: #28a745;">{{ completed_month }}</h4>
+                <p class="text-secondary mb-0 small">Completed</p>
+            </div>
+        </div>
+        <div class="col-md-2 animate-up" style="animation-delay: 0.5s;">
+            <div class="stat-card p-3 text-center">
+                <div class="mb-2">
+                    <i class="fas fa-times fa-2x" style="color: #6c757d;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color: #6c757d;">{{ cancelled_month }}</h4>
+                <p class="text-secondary mb-0 small">Cancelled</p>
+            </div>
+        </div>
+        <div class="col-md-2 animate-up" style="animation-delay: 0.6s;">
+            <div class="stat-card p-3 text-center">
+                <div class="mb-2">
+                    <i class="fas fa-user-slash fa-2x" style="color: #dc3545;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color: #dc3545;">{{ no_show_month }}</h4>
+                <p class="text-secondary mb-0 small">No-Show</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Today's Appointments -->
+        <div class="col-lg-8 animate-up" style="animation-delay: 0.7s;">
+            <div class="appointment-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-day fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Today's Appointments</h5>
+                            <p class="text-secondary mb-0">{{ today|date:"l, F j, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% if today_appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Student</th>
+                                    <th>Student ID</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in today_appointments %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ appointment.appointment_time }}</strong>
+                                        {% if appointment.is_past %}
+                                        <span class="badge bg-secondary ms-1">Past</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                                {{ appointment.student.get_full_name|default:appointment.student.username|slice:":2"|upper }}
+                                            </div>
+                                            {{ appointment.student.get_full_name }}
+                                        </div>
+                                    </td>
+                                    <td>{{ appointment.student.student_number|default:"N/A" }}</td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 150px;">
+                                            {{ appointment.reason|truncatechars:30 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {% if appointment.status == 'pending' %}bg-warning{% elif appointment.status == 'confirmed' %}bg-success{% elif appointment.status == 'completed' %}bg-info{% elif appointment.status == 'cancelled' %}bg-danger{% elif appointment.status == 'no_show' %}bg-secondary{% endif %} text-white">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'appointments:appointment_detail' appointment.appointment_id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if appointment.status == 'confirmed' or appointment.status == 'pending' %}
+                                            <a href="{% url 'appointments:appointment_update_status' appointment.appointment_id %}" 
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No appointments scheduled for today</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="col-lg-4 animate-up" style="animation-delay: 0.8s;">
+            <div class="appointment-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-alt fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Next 7 Days</h5>
+                            <p class="text-secondary mb-0">Upcoming schedule</p>
+                        </div>
+                    </div>
+                </div>
+                {% if upcoming_appointments %}
+                    {% for appointment in upcoming_appointments %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ appointment.appointment_date|date:"D, M d" }}</strong>
+                                <small class="text-muted d-block">{{ appointment.appointment_time }}</small>
+                                <div class="d-flex align-items-center mt-1">
+                                    <div class="user-avatar me-2" style="width: 25px; height: 25px; font-size: 0.7rem;">
+                                        {{ appointment.student.get_full_name|default:appointment.student.username|slice:":2"|upper }}
+                                    </div>
+                                    <small class="text-muted">{{ appointment.student.get_full_name }}</small>
+                                </div>
+                            </div>
+                            <span class="status-badge {% if appointment.status == 'pending' %}bg-warning{% elif appointment.status == 'confirmed' %}bg-success{% elif appointment.status == 'completed' %}bg-info{% elif appointment.status == 'cancelled' %}bg-danger{% elif appointment.status == 'no_show' %}bg-secondary{% endif %} text-white">
+                                {{ appointment.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <a href="{% url 'appointments:appointment_detail' appointment.appointment_id %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">No upcoming appointments</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- All-Time Overview & Visual Analytics -->
+    <div class="row g-4 mt-2">
+        <div class="col-12 animate-up" style="animation-delay: 0.9s;">
+            <div class="appointment-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-pie fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">All-Time Performance & Analytics</h5>
+                            <p class="text-secondary mb-0">Total volume breakdown and appointment status distribution</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-7">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="text-center p-3 rounded-4 border" style="background: rgba(30, 42, 94, 0.04);">
+                                    <h4 class="text-primary fw-bold mb-1">{{ all_appointments_count }}</h4>
+                                    <p class="text-muted mb-0 small">Total Appointments</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-center p-3 rounded-4 border" style="background: rgba(40, 167, 69, 0.06);">
+                                    <h4 class="text-success fw-bold mb-1">{{ all_completed }}</h4>
+                                    <p class="text-muted mb-0 small">Completed</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="text-center p-3 rounded-4 border" style="background: rgba(255, 193, 7, 0.08);">
+                                    <h4 class="text-warning fw-bold mb-1">{{ all_pending }}</h4>
+                                    <p class="text-muted mb-0 small">Pending</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="text-center p-3 rounded-4 border" style="background: rgba(0, 123, 255, 0.06);">
+                                    <h4 class="text-info fw-bold mb-1">{{ all_confirmed }}</h4>
+                                    <p class="text-muted mb-0 small">Confirmed</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="text-center p-3 rounded-4 border" style="background: rgba(220, 53, 69, 0.06);">
+                                    <h4 class="text-danger fw-bold mb-1">{{ all_no_show }}</h4>
+                                    <p class="text-muted mb-0 small">No-Shows</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="p-3 rounded-4 border text-center" style="background: rgba(255, 255, 255, 0.7); min-height: 230px;">
+                            <h6 class="fw-bold mb-2 text-secondary" style="font-size: 0.85rem;"><i class="fas fa-chart-donut me-1"></i>All-Time Status Breakdown</h6>
+                            <div style="height: 180px; position: relative;">
+                                <canvas id="staffWeeklyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Floating Glass Toasts Container (2026 Edition) -->
+<div class="toast-container-custom" id="toastContainer"></div>
+
+<!-- Universal 2026 Command Palette (Ctrl+K) -->
+<div class="cmd-palette-backdrop" id="cmdPaletteBackdrop" onclick="handleCmdBackdropClick(event)">
+    <div class="cmd-palette-card" id="cmdPaletteCard">
+        <div class="cmd-search-wrapper">
+            <i class="fas fa-search text-primary"></i>
+            <input type="text" class="cmd-search-input" id="cmdSearchInput" placeholder="Type a command or jump to... (e.g. schedule, appointments, dark mode)" autocomplete="off">
+            <kbd class="cmd-kbd">ESC</kbd>
+        </div>
+        <div class="cmd-list" id="cmdList">
+            <div class="cmd-group-title">Staff Navigation</div>
+            <a href="{% url 'dashboard:dashboard' %}" class="cmd-item" data-title="dashboard home portal overview">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon"><i class="fas fa-home"></i></span>
+                    <div>
+                        <div class="fw-semibold">Dashboard Overview</div>
+                        <small class="text-muted">Return to staff dashboard</small>
+                    </div>
+                </div>
+                <kbd class="cmd-kbd">↵</kbd>
+            </a>
+            <a href="{% url 'appointments:appointment_list' %}" class="cmd-item" data-title="appointments schedule calendar list today">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon"><i class="fas fa-calendar-check"></i></span>
+                    <div>
+                        <div class="fw-semibold">My Appointments</div>
+                        <small class="text-muted">Review today's appointments and calendar</small>
+                    </div>
+                </div>
+                <kbd class="cmd-kbd">↵</kbd>
+            </a>
+            <a href="{% url 'availability:availability_list' %}" class="cmd-item" data-title="schedule working hours availability shifts">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon text-primary"><i class="fas fa-clock"></i></span>
+                    <div>
+                        <div class="fw-semibold">Manage Working Hours</div>
+                        <small class="text-muted">Configure your weekly schedule and shifts</small>
+                    </div>
+                </div>
+                <kbd class="cmd-kbd">↵</kbd>
+            </a>
+            <a href="{% url 'availability:availability_add' %}" class="cmd-item" data-title="add working hours schedule shift new">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon text-success"><i class="fas fa-plus-circle"></i></span>
+                    <div>
+                        <div class="fw-semibold">Add Working Hours</div>
+                        <small class="text-muted">Create a new working shift</small>
+                    </div>
+                </div>
+                <kbd class="cmd-kbd">↵</kbd>
+            </a>
+            <a href="{% url 'notifications:notification_list' %}" class="cmd-item" data-title="notifications notices alerts unread inbox">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon"><i class="fas fa-bell"></i></span>
+                    <div>
+                        <div class="fw-semibold">Notification Center</div>
+                        <small class="text-muted">View student bookings and notices</small>
+                    </div>
+                </div>
+                <kbd class="cmd-kbd">↵</kbd>
+            </a>
+
+            <div class="cmd-group-title">Quick Actions</div>
+            <div class="cmd-item" onclick="toggleTheme(); closeCommandPalette();" data-title="dark mode light mode theme toggle high contrast">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon"><i class="fas fa-moon"></i></span>
+                    <div>
+                        <div class="fw-semibold">Toggle Dark / Light Theme</div>
+                        <small class="text-muted">Switch high-contrast theme</small>
+                    </div>
+                </div>
+                <span class="badge bg-light text-dark border">Theme</span>
+            </div>
+            <div class="cmd-item" onclick="cycleFontSize(); closeCommandPalette();" data-title="font size text scale accessibility zoom">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon"><i class="fas fa-text-height"></i></span>
+                    <div>
+                        <div class="fw-semibold">Adjust Text Sizing (WCAG 2.1)</div>
+                        <small class="text-muted">Scale font size: A-, A, A+, A++</small>
+                    </div>
+                </div>
+                <span class="badge bg-light text-dark border">Zoom</span>
+            </div>
+            <div class="cmd-item" onclick="markAllNotificationsReadDropdown(); closeCommandPalette(); showToast('success', 'Notifications', 'All notifications marked as read');" data-title="mark all read notifications clear alerts">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon"><i class="fas fa-check-double"></i></span>
+                    <div>
+                        <div class="fw-semibold">Mark All Notifications Read</div>
+                        <small class="text-muted">Clear unread notification counter</small>
+                    </div>
+                </div>
+                <span class="badge bg-light text-dark border">Action</span>
+            </div>
+            <a href="{% url 'accounts:logout' %}" class="cmd-item text-danger" data-title="logout sign out exit quit">
+                <div class="d-flex align-items-center">
+                    <span class="cmd-item-icon text-danger" style="background: rgba(220,53,69,0.1);"><i class="fas fa-sign-out-alt"></i></span>
+                    <div>
+                        <div class="fw-semibold">Sign Out</div>
+                        <small class="text-muted">Securely log out of staff account</small>
+                    </div>
+                </div>
+                <kbd class="cmd-kbd">↵</kbd>
+            </a>
+        </div>
+        <div class="cmd-footer">
+            <span><i class="fas fa-arrow-up fa-xs"></i> <i class="fas fa-arrow-down fa-xs me-1"></i> to navigate</span>
+            <span><kbd class="cmd-kbd">↵</kbd> to select</span>
+            <span><kbd class="cmd-kbd">ESC</kbd> to close</span>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Bottom Navigation Dock -->
+<div class="mobile-bottom-dock no-print">
+    <a href="{% url 'dashboard:dashboard' %}" class="mobile-dock-btn active" title="Dashboard">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+    <a href="{% url 'appointments:appointment_list' %}" class="mobile-dock-btn" title="Appointments">
+        <i class="fas fa-calendar-check"></i>
+        <span>Schedule</span>
+    </a>
+    <a href="{% url 'availability:availability_list' %}" class="mobile-dock-btn" title="Hours">
+        <i class="fas fa-clock"></i>
+        <span>Hours</span>
+    </a>
+    <a href="{% url 'notifications:notification_list' %}" class="mobile-dock-btn position-relative" title="Notifications">
+        <i class="fas fa-bell"></i>
+        <span>Notices</span>
+        <span id="mobileNotifBadge" class="mobile-dock-badge d-none">0</span>
+    </a>
+    <button type="button" class="mobile-dock-btn border-0 bg-transparent" onclick="openCommandPalette()" title="Command Menu">
+        <i class="fas fa-bars"></i>
+        <span>Menu</span>
+    </button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Initialize All-Time Status Breakdown Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('staffWeeklyChart');
+        if (ctx) {
+            const dataCounts = [
+                {{ all_completed|default:0 }},
+                {{ all_confirmed|default:0 }},
+                {{ all_pending|default:0 }},
+                {{ all_no_show|default:0 }},
+                {{ all_cancelled|default:0 }}
+            ];
+            const hasData = dataCounts.some(v => v > 0);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Confirmed', 'Pending', 'No-Show', 'Cancelled'],
+                    datasets: [{
+                        data: hasData ? dataCounts : [1],
+                        backgroundColor: hasData ? [
+                            '#28a745',
+                            '#007bff',
+                            '#ffc107',
+                            '#dc3545',
+                            '#6c757d'
+                        ] : ['#e9ecef'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, family: "'Inter', sans-serif" }
+                            }
+                        },
+                        tooltip: {
+                            enabled: hasData
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    });
+
+    // Theme Switcher Logic
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('ccams_theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const icon = document.getElementById('themeIcon');
+        if(icon) {
+            icon.className = theme === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+        }
+    }
+
+    // Font Scaler Logic
+    const fontScales = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+    const fontLabels = {'font-sm': 'A-', 'font-md': 'A', 'font-lg': 'A+', 'font-xl': 'A++'};
+    
+    function cycleFontSize() {
+        const current = localStorage.getItem('ccams_font_scale') || 'font-md';
+        const nextIdx = (fontScales.indexOf(current) + 1) % fontScales.length;
+        const nextScale = fontScales[nextIdx];
+        document.documentElement.className = nextScale;
+        localStorage.setItem('ccams_font_scale', nextScale);
+        updateFontLabel(nextScale);
+    }
+
+    function updateFontLabel(scale) {
+        const label = document.getElementById('fontScaleLabel');
+        if(label) label.innerText = fontLabels[scale] || 'A';
+    }
+
+    // Notification Center Logic
+    function loadNotifications() {
+        const notifBadge = document.getElementById('notifBadge');
+        const notifList = document.getElementById('notifListDropdown');
+        if(!notifList) return;
+
+        fetch('{% url "notifications:api_recent" %}')
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    if(data.unread_count > 0 && notifBadge) {
+                        notifBadge.innerText = data.unread_count > 99 ? '99+' : data.unread_count;
+                        notifBadge.classList.remove('d-none');
+                    } else if(notifBadge) {
+                        notifBadge.classList.add('d-none');
+                    }
+
+                    if(data.notifications.length === 0) {
+                        notifList.innerHTML = '<div class="text-center py-4 text-muted small"><i class="fas fa-bell-slash me-1"></i>No notifications</div>';
+                    } else {
+                        let html = '';
+                        data.notifications.slice(0, 5).forEach(n => {
+                            html += `
+                            <div class="px-3 py-2 border-bottom notif-item ${!n.is_read ? 'bg-primary bg-opacity-10' : ''}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">${n.purpose_display}</span>
+                                    <small class="text-muted" style="font-size: 0.65rem;">${n.time_ago}</small>
+                                </div>
+                                <div class="small fw-semibold text-truncate mb-1" style="max-width: 280px; color: var(--text-primary);">${n.subject || n.purpose_display}</div>
+                                <p class="text-secondary small mb-1" style="font-size: 0.75rem; line-height: 1.25;">${n.message}</p>
+                                ${n.appointment_id ? `<a href="/appointments/${n.appointment_id}/" class="text-primary text-decoration-none small fw-semibold" style="font-size: 0.7rem;"><i class="fas fa-arrow-right me-1"></i>View details</a>` : ''}
+                            </div>`;
+                        });
+                        notifList.innerHTML = html;
+                    }
+                }
+            })
+            .catch(() => {
+                if(notifList) notifList.innerHTML = '<div class="text-center py-3 text-muted small">Notifications unavailable</div>';
+            });
+    }
+
+    function markAllNotificationsReadDropdown() {
+        fetch('{% url "notifications:api_mark_all_read" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        }).then(() => {
+            loadNotifications();
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // ==========================================
+    // 2026 Live Clinic Status & Toast & Command Palette
+    // ==========================================
+    function updateClinicStatus() {
+        const pill = document.getElementById('clinicStatusPill');
+        const text = document.getElementById('clinicStatusText');
+        const dot = document.getElementById('clinicPulseDot');
+        if (!pill || !text || !dot) return;
+
+        const now = new Date();
+        const day = now.getDay();
+        const hour = now.getHours();
+        const isWeekday = (day >= 1 && day <= 5);
+        const isOpen = isWeekday && (hour >= 8 && hour < 17);
+
+        if (isOpen) {
+            dot.className = 'pulse-dot-wrapper pulse-green';
+            text.innerText = 'Open Now (Closes 17:00)';
+            pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        } else {
+            dot.className = 'pulse-dot-wrapper pulse-amber';
+            text.innerText = isWeekday ? 'Closed (Opens 08:00)' : 'Closed for Weekend';
+            pill.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        }
+    }
+
+    function showToast(type, title, message, durationMs = 5000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'glass-toast';
+
+        const iconMap = {
+            'success': '<i class="fas fa-check-circle text-success fa-lg"></i>',
+            'error': '<i class="fas fa-exclamation-circle text-danger fa-lg"></i>',
+            'warning': '<i class="fas fa-exclamation-triangle text-warning fa-lg"></i>',
+            'info': '<i class="fas fa-info-circle text-primary fa-lg"></i>'
+        };
+
+        toast.innerHTML = `
+            <div class="mt-1">${iconMap[type] || iconMap['info']}</div>
+            <div class="flex-grow-1 me-2">
+                <div class="fw-bold small mb-1" style="color: var(--text-primary);">${title || 'Notification'}</div>
+                <div class="text-secondary small" style="font-size: 0.8rem; line-height: 1.3;">${message}</div>
+            </div>
+            <button type="button" class="btn-close btn-close-sm" style="font-size: 0.65rem;" onclick="this.closest('.glass-toast').remove()"></button>
+            <div class="glass-toast-progress">
+                <div class="glass-toast-progress-bar"></div>
+            </div>
+        `;
+
+        container.appendChild(toast);
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+            const bar = toast.querySelector('.glass-toast-progress-bar');
+            if (bar) {
+                bar.style.transitionDuration = `${durationMs}ms`;
+                bar.style.width = '0%';
+            }
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 350);
+        }, durationMs);
+    }
+
+    let cmdSelectedIndex = 0;
+    function openCommandPalette() {
+        const backdrop = document.getElementById('cmdPaletteBackdrop');
+        const input = document.getElementById('cmdSearchInput');
+        if (!backdrop || !input) return;
+        backdrop.classList.add('active');
+        input.value = '';
+        filterCommandList('');
+        input.focus();
+    }
+
+    function closeCommandPalette() {
+        const backdrop = document.getElementById('cmdPaletteBackdrop');
+        if (backdrop) backdrop.classList.remove('active');
+    }
+
+    function handleCmdBackdropClick(e) {
+        if (e.target.id === 'cmdPaletteBackdrop') closeCommandPalette();
+    }
+
+    function filterCommandList(query) {
+        const q = query.toLowerCase().trim();
+        const items = document.querySelectorAll('#cmdList .cmd-item');
+        const titles = document.querySelectorAll('#cmdList .cmd-group-title');
+
+        items.forEach((item) => {
+            const titleData = (item.getAttribute('data-title') || '').toLowerCase();
+            const text = item.innerText.toLowerCase();
+            const matches = !q || titleData.includes(q) || text.includes(q);
+            item.style.display = matches ? 'flex' : 'none';
+            item.classList.remove('selected');
+        });
+
+        titles.forEach(title => {
+            let next = title.nextElementSibling;
+            let hasVisibleSibling = false;
+            while (next && !next.classList.contains('cmd-group-title')) {
+                if (next.style.display !== 'none') {
+                    hasVisibleSibling = true;
+                    break;
+                }
+                next = next.nextElementSibling;
+            }
+            title.style.display = hasVisibleSibling ? 'block' : 'none';
+        });
+
+        cmdSelectedIndex = 0;
+        const visibleItems = Array.from(document.querySelectorAll('#cmdList .cmd-item')).filter(el => el.style.display !== 'none');
+        if (visibleItems.length > 0) visibleItems[0].classList.add('selected');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const backdrop = document.getElementById('cmdPaletteBackdrop');
+        const isOpen = backdrop && backdrop.classList.contains('active');
+
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+            e.preventDefault();
+            isOpen ? closeCommandPalette() : openCommandPalette();
+        } else if (isOpen) {
+            const visible = Array.from(document.querySelectorAll('#cmdList .cmd-item')).filter(el => el.style.display !== 'none');
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeCommandPalette();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (visible.length === 0) return;
+                visible[cmdSelectedIndex]?.classList.remove('selected');
+                cmdSelectedIndex = (cmdSelectedIndex + 1) % visible.length;
+                visible[cmdSelectedIndex]?.classList.add('selected');
+                visible[cmdSelectedIndex]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (visible.length === 0) return;
+                visible[cmdSelectedIndex]?.classList.remove('selected');
+                cmdSelectedIndex = (cmdSelectedIndex - 1 + visible.length) % visible.length;
+                visible[cmdSelectedIndex]?.classList.add('selected');
+                visible[cmdSelectedIndex]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (visible[cmdSelectedIndex]) visible[cmdSelectedIndex].click();
+            }
+        }
+    });
+
+    document.getElementById('cmdSearchInput')?.addEventListener('input', (e) => filterCommandList(e.target.value));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'light');
+        updateFontLabel(localStorage.getItem('ccams_font_scale') || 'font-md');
+        updateClinicStatus();
+        setInterval(updateClinicStatus, 60000);
+        {% if user.is_authenticated %}
+        loadNotifications();
+        {% endif %}
+    });
+
+    // Add smooth animations on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-up').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+</body>
+</html>

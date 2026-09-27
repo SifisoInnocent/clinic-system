@@ -1,0 +1,143 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Notifications - CCAMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-1" style="color: var(--text-primary, #1e2a5e);">
+                    <i class="fas fa-bell me-2 text-primary"></i>Notification Center
+                </h2>
+                <p class="text-muted mb-0">System alerts, booking confirmations, and appointment updates</p>
+            </div>
+            <div class="d-flex gap-2">
+                {% if unread_count > 0 %}
+                <button type="button" class="btn btn-outline-primary rounded-pill px-3" onclick="markAllNotificationsRead()">
+                    <i class="fas fa-check-double me-1"></i>Mark all as read
+                </button>
+                {% endif %}
+                <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        {% if notifications %}
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4" style="background: var(--card-bg, rgba(255,255,255,0.85));">
+                <div class="list-group list-group-flush">
+                    {% for n in notifications %}
+                    <div class="list-group-item p-3 border-bottom d-flex align-items-start gap-3 {% if not n.is_read %}bg-primary bg-opacity-10{% endif %}" id="notif-row-{{ n.id }}" style="background: inherit;">
+                        <div class="rounded-circle p-2 text-white mt-1 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; flex-shrink: 0; background: {% if n.purpose == 'booking' %}#00b894{% elif n.purpose == 'cancellation' %}#d63031{% elif n.purpose == 'reschedule' %}#fdcb6e{% elif n.purpose == 'reminder' %}#0984e3{% else %}#6c5ce7{% endif %};">
+                            <i class="fas {% if n.purpose == 'booking' %}fa-calendar-check{% elif n.purpose == 'cancellation' %}fa-calendar-times{% elif n.purpose == 'reschedule' %}fa-calendar-alt{% elif n.purpose == 'reminder' %}fa-clock{% else %}fa-envelope{% endif %}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge rounded-pill bg-light text-dark border">
+                                    <i class="fas {% if n.type == 'email' %}fa-envelope{% else %}fa-comment-dots{% endif %} me-1"></i>
+                                    {{ n.get_type_display }} &bull; {{ n.get_purpose_display }}
+                                </span>
+                                <small class="text-muted">{{ n.created_at|timesince }} ago</small>
+                            </div>
+                            <h6 class="fw-semibold mb-1" style="color: var(--text-primary, #1e2a5e);">{{ n.subject|default:n.get_purpose_display }}</h6>
+                            <p class="mb-2 text-secondary small" style="white-space: pre-line;">{{ n.message }}</p>
+                            
+                            <div class="d-flex align-items-center gap-3">
+                                {% if n.appointment %}
+                                <a href="{% url 'appointments:appointment_detail' n.appointment.appointment_id %}" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 small">
+                                    <i class="fas fa-eye me-1"></i>View Appointment
+                                </a>
+                                {% endif %}
+                                {% if not n.is_read %}
+                                <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-muted" onclick="markSingleRead({{ n.id }})">
+                                    <i class="fas fa-check me-1"></i>Mark read
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if notifications.has_other_pages %}
+            <nav aria-label="Notifications navigation" class="d-flex justify-content-center">
+                <ul class="pagination pagination-sm">
+                    {% if notifications.has_previous %}
+                        <li class="page-item"><a class="page-link rounded-pill px-3 me-1" href="?page={{ notifications.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link rounded-pill px-3 me-1">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span></li>
+                    {% if notifications.has_next %}
+                        <li class="page-item"><a class="page-link rounded-pill px-3" href="?page={{ notifications.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="card shadow-sm border-0 rounded-4 text-center p-5" style="background: var(--card-bg, rgba(255,255,255,0.85));">
+                <div class="my-4">
+                    <i class="fas fa-bell-slash fa-4x text-muted mb-3 opacity-50"></i>
+                    <h4 class="fw-bold">No Notifications</h4>
+                    <p class="text-muted">You have no notifications or alerts at this time.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function markSingleRead(id) {
+    fetch(`/notifications/api/mark-read/${id}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'success') {
+            const row = document.getElementById(`notif-row-${id}`);
+            if(row) {
+                row.classList.remove('bg-primary', 'bg-opacity-10');
+                const btn = row.querySelector('button[onclick*="markSingleRead"]');
+                if(btn) btn.remove();
+            }
+        }
+    });
+}
+
+function markAllNotificationsRead() {
+    fetch(`/notifications/api/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.status === 'success') {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

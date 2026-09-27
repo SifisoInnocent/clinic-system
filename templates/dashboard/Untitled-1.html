@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | Admin Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: modern mix -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1e2a5e, #2c3e6e);
+        }
+        
+        .overview-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .overview-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e2a5e, #2c3e6e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold" href="{% url 'dashboard:dashboard' %}">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+                <li class="nav-item"><a class="nav-link fw-semibold active" href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'appointments:appointment_list' %}">Appointments</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'accounts:user_list' %}">Users</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'reports:reports' %}">Reports</a></li>
+                <li class="nav-item ms-lg-2">
+                    <div class="dropdown">
+                        <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container pt-5 pb-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5 animate-up">
+        <div class="badge bg-light text-dark rounded-pill px-4 py-2 mb-3 shadow-sm">
+            <i class="fas fa-shield-alt me-2"></i>Admin Portal
+        </div>
+        <h1 class="hero-title mb-3">Welcome back, <span style="color:#2c3e6e;">{{ user.get_full_name|default:user.username }}</span></h1>
+        <p class="text-secondary-emphasis fs-5" style="color: #2d3a4a;">System Administration - Complete control and oversight</p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{% url 'accounts:user_create' %}" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white">
+                <i class="fas fa-user-plus me-2"></i>Create User
+            </a>
+            <a href="{% url 'reports:reports' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                Generate Reports <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8 animate-up" style="animation-delay: 0.1s;">
+            <div class="overview-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">User Statistics</h5>
+                            <p class="text-secondary mb-0">System user demographics</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-primary fw-bold">{{ total_users }}</h4>
+                            <p class="text-muted mb-0">Total Users</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-info fw-bold">{{ total_students }}</h4>
+                            <p class="text-muted mb-0">Students</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-success fw-bold">{{ total_staff }}</h4>
+                            <p class="text-muted mb-0">Staff</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-warning fw-bold">{{ total_admins }}</h4>
+                            <p class="text-muted mb-0">Admins</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 animate-up" style="animation-delay: 0.2s;">
+            <div class="overview-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Appointment Stats</h5>
+                            <p class="text-secondary mb-0">System overview</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-primary fw-bold">{{ total_appointments }}</h4>
+                            <p class="text-muted mb-0 small">Total</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-info fw-bold">{{ today_appointments }}</h4>
+                            <p class="text-muted mb-0 small">Today</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2">
+                            <small class="text-muted">Pending: {{ pending_appointments }}</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2">
+                            <small class="text-muted">Confirmed: {{ confirmed_appointments }}</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2">
+                            <small class="text-muted">Completed: {{ completed_appointments }}</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2">
+                            <small class="text-muted">No-Show: {{ no_show_appointments }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Overview -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 animate-up" style="animation-delay: 0.3s;">
+            <div class="stat-card p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-clock fa-3x" style="color: #ffc107;"></i>
+                </div>
+                <h3 class="fw-bold mb-2" style="color: #ffc107;">{{ pending_appointments }}</h3>
+                <p class="text-secondary mb-0">Pending Appointments</p>
+            </div>
+        </div>
+        <div class="col-md-3 animate-up" style="animation-delay: 0.4s;">
+            <div class="stat-card p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle fa-3x" style="color: #007bff;"></i>
+                </div>
+                <h3 class="fw-bold mb-2" style="color: #007bff;">{{ confirmed_appointments }}</h3>
+                <p class="text-secondary mb-0">Confirmed Appointments</p>
+            </div>
+        </div>
+        <div class="col-md-3 animate-up" style="animation-delay: 0.5s;">
+            <div class="stat-card p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-check fa-3x" style="color: #28a745;"></i>
+                </div>
+                <h3 class="fw-bold mb-2" style="color: #28a745;">{{ completed_appointments }}</h3>
+                <p class="text-secondary mb-0">Completed Appointments</p>
+            </div>
+        </div>
+        <div class="col-md-3 animate-up" style="animation-delay: 0.6s;">
+            <div class="stat-card p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-slash fa-3x" style="color: #dc3545;"></i>
+                </div>
+                <h3 class="fw-bold mb-2" style="color: #dc3545;">{{ no_show_appointments }}</h3>
+                <p class="text-secondary mb-0">No-Shows</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Appointments -->
+        <div class="col-lg-6 animate-up" style="animation-delay: 0.7s;">
+            <div class="overview-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-history fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Recent Appointments</h5>
+                            <p class="text-secondary mb-0">Latest system activity</p>
+                        </div>
+                    </div>
+                </div>
+                {% if recent_appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student</th>
+                                    <th>Staff</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in recent_appointments %}
+                                <tr>
+                                    <td>{{ appointment.appointment_id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-2" style="width: 25px; height: 25px; font-size: 0.7rem;">
+                                                {{ appointment.student.get_full_name|default:appointment.student.username|slice:":2"|upper }}
+                                            </div>
+                                            {{ appointment.student.get_full_name }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-2" style="width: 25px; height: 25px; font-size: 0.7rem;">
+                                                {{ appointment.staff.get_full_name|default:appointment.staff.username|slice:":2"|upper }}
+                                            </div>
+                                            {{ appointment.staff.get_full_name }}
+                                        </div>
+                                    </td>
+                                    <td>{{ appointment.appointment_date|date:"M d" }}</td>
+                                    <td>
+                                        <span class="status-badge {% if appointment.status == 'pending' %}bg-warning{% elif appointment.status == 'confirmed' %}bg-success{% elif appointment.status == 'completed' %}bg-info{% elif appointment.status == 'cancelled' %}bg-danger{% elif appointment.status == 'no_show' %}bg-secondary{% endif %} text-white">
+                                            {{ appointment.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent appointments</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Staff Performance -->
+        <div class="col-lg-6 animate-up" style="animation-delay: 0.8s;">
+            <div class="overview-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-line fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Staff Performance</h5>
+                            <p class="text-secondary mb-0">Team efficiency metrics</p>
+                        </div>
+                    </div>
+                </div>
+                {% if staff_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Staff Member</th>
+                                    <th>Total</th>
+                                    <th>Completed</th>
+                                    <th>No-Show</th>
+                                    <th>Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for staff in staff_stats %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-2" style="width: 25px; height: 25px; font-size: 0.7rem;">
+                                                {{ staff.get_full_name|default:staff.username|slice:":2"|upper }}
+                                            </div>
+                                            {{ staff.get_full_name }}
+                                        </div>
+                                    </td>
+                                    <td>{{ staff.total_appointments }}</td>
+                                    <td>{{ staff.completed_appointments }}</td>
+                                    <td>{{ staff.no_show_appointments }}</td>
+                                    <td>
+                                        {% if staff.total_appointments > 0 %}
+                                            {% ifnotequal staff.completed_appointments 0 %}
+                                                {% widthratio staff.completed_appointments staff.total_appointments 100 %}%
+                                            {% else %}
+                                                0%
+                                            {% endifnotequal %}
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No staff performance data available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends -->
+    <div class="row g-4 mt-2">
+        <div class="col-12 animate-up" style="animation-delay: 0.9s;">
+            <div class="overview-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-bar fa-2x me-3" style="color: #1e2a5e;"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Monthly Appointment Trends</h5>
+                            <p class="text-secondary mb-0">Last 6 months overview</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    {% for month in monthly_stats %}
+                    <div class="col-md-2">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h5 class="text-primary fw-bold">{{ month.count }}</h5>
+                            <p class="small text-muted mb-0">{{ month.month }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add smooth animations on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-up').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+</body>
+</html>

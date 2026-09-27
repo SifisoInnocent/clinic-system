@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Blocked Periods - CCAMS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-calendar-times me-2"></i>
+                    Blocked Periods
+                </h2>
+                <a href="{% url 'availability:blocked_period_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Add Blocked Period
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for period in blocked_periods %}
+                                <tr>
+                                    <td>{{ period.start_date|date:"M d, Y" }}</td>
+                                    <td>{{ period.end_date|date:"M d, Y" }}</td>
+                                    <td>{{ period.reason|default:"-" }}</td>
+                                    <td>
+                                        {% if period.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'availability:blocked_period_edit' period.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'availability:blocked_period_toggle' period.id %}" class="btn btn-sm btn-outline-warning">
+                                                {% if period.is_active %}
+                                                    <i class="fas fa-ban"></i>
+                                                {% else %}
+                                                    <i class="fas fa-check"></i>
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No blocked periods found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

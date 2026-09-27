@@ -1,0 +1,68 @@
+# Django Core
+Django==4.2.7
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+
+# Database (for production - optional)
+# psycopg2-binary==2.9.7
+
+# PDF Generation
+reportlab==4.0.7
+Pillow>=10.2.0
+
+# Excel/CSV Processing
+openpyxl==3.1.2
+pandas==2.1.3
+
+# Email and SMS
+twilio==8.10.3
+africastalking==1.2.7
+
+# Security
+django-axes==6.1.1
+django-ratelimit==4.1.0
+
+# Development and Testing
+pytest==7.4.3
+pytest-django==4.7.0
+factory-boy==3.3.0
+coverage==7.3.2
+
+# Environment Variables
+python-decouple==3.8
+
+# Date and Time
+python-dateutil==2.8.2
+
+# Image Processing (for profile pictures)
+Pillow>=10.2.0
+
+# Caching (optional for production)
+redis==5.0.1
+django-redis==5.4.0
+
+# API Framework (optional for future API development)
+djangorestframework==3.14.0
+
+# Documentation (optional)
+sphinx==7.2.6
+
+# Performance Monitoring (optional for production)
+sentry-sdk==1.38.0
+
+# Task Queue (optional for background tasks)
+celery==5.3.4
+flower==2.0.1
+
+# Static file serving (for development)
+whitenoise==6.6.0
+
+# CORS (for API development)
+django-cors-headers==4.3.1
+
+# Extensions
+django-extensions==3.2.3
+
+gunicorn==21.2.0
+dj-database-url==2.1.0
+psycopg2-binary==2.9.9

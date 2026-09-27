@@ -1,0 +1,719 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | Home & Portal</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: modern mix -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    {% load static %}
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <script>
+        (function() {
+            const theme = localStorage.getItem('ccams_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            const fontScale = localStorage.getItem('ccams_font_scale') || 'font-md';
+            document.documentElement.className = fontScale;
+        })();
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Login card - floating glass elevated */
+        .login-glass {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-glass:hover {
+            transform: scale(1.01);
+        }
+        
+        .form-control-custom {
+            border-radius: 1.2rem;
+            padding: 0.75rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffffcc;
+            transition: all 0.2s;
+        }
+        
+        .form-control-custom:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+            background: white;
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .demo-badge-grid {
+            background: rgba(240, 245, 255, 0.6);
+            border-radius: 1.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .demo-badge-grid:hover {
+            background: #eef2ff;
+            transform: translateX(5px);
+        }
+        
+        .footer-link {
+            color: #4a5568;
+            transition: 0.2s;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        
+        .footer-link:hover {
+            color: #1e2a5e;
+        }
+        
+        .role-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.4rem;
+            }
+            .login-glass {
+                margin-top: 1rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+        
+        .alert-custom {
+            border-radius: 1rem;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar (clean home feel) -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold d-flex align-items-center" href="#">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+            <span class="clinic-status-pill ms-3 d-none d-sm-inline-flex" id="clinicStatusPill" title="Campus Clinic Hours: Mon-Fri 08:00 - 17:00">
+                <span class="pulse-dot-wrapper pulse-green" id="clinicPulseDot"><span class="pulse-ring"></span><span class="pulse-dot"></span></span>
+                <span id="clinicStatusText">Open Now</span>
+            </span>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-center">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#features">Services</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#about">About</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#contact">Contact</a></li>
+                
+                <!-- Accessibility Controls -->
+                <li class="nav-item d-flex align-items-center gap-1 ms-lg-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" id="themeToggleBtn" style="width: 34px; height: 34px;" title="Toggle High-Contrast / Dark Mode" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 small fw-bold" id="fontScaleBtn" style="font-size: 0.75rem;" title="Adjust Text Size (WCAG 2.1)" onclick="cycleFontSize()">
+                        <span id="fontScaleLabel">A</span>
+                    </button>
+                </li>
+                
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-primary-gradient rounded-pill px-4 text-white" href="#login-panel" style="font-weight: 500;">Portal Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main>
+    <!-- Hero Section + Login side by side -->
+    <div class="container pt-5 pb-5" id="home">
+        <div class="row align-items-center g-5">
+            <!-- left hero content -->
+            <div class="col-lg-6 animate-up">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white border shadow-sm mb-4" style="background: rgba(255,255,255,0.85) !important; backdrop-filter: blur(5px);">
+                    <span class="pulse-dot-wrapper pulse-green"><span class="pulse-ring"></span><span class="pulse-dot"></span></span>
+                    <span class="small fw-bold text-success" style="letter-spacing: 0.5px;">2026 Smart Campus Healthcare</span>
+                </div>
+                
+                <h1 class="hero-title mb-4" style="font-size: 3.5rem;">
+                    Campus Health & <br>Mental Wellness, <br>
+                    <span style="background: linear-gradient(135deg, #6c5ce7, #00cec9); -webkit-background-clip: text; color: transparent; position: relative;">
+                        Elevated.
+                        <!-- Small decorative sparkle SVG -->
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top: -10px; right: -30px;">
+                            <path d="M12 0L13.8444 8.15561L22 10L13.8444 11.8444L12 20L10.1556 11.8444L2 10L10.1556 8.15561L12 0Z" fill="#fdcb6e"/>
+                        </svg>
+                    </span>
+                </h1>
+                
+                <p class="text-secondary fs-5 mb-5" style="max-width: 90%; line-height: 1.6;">Seamless appointments, certified nursing care, and confidential psychological counseling — all in one unified digital platform for students and staff.</p>
+                
+                <!-- Beautiful hero image replacing the plain row -->
+                <div class="position-relative mb-5" style="border-radius: 2rem; overflow: hidden; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); max-width: 95%;">
+                    <img src="https://images.unsplash.com/photo-1576091160550-2173ff9e5ee5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Modern clinic" class="img-fluid" style="width: 100%; height: 280px; object-fit: cover; transform: scale(1.05); transition: transform 0.5s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1.05)'">
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(30,42,94,0.95), transparent);">
+                        <div class="d-flex align-items-center justify-content-between text-white">
+                            <div>
+                                <h5 class="fw-bold mb-1">State-of-the-Art Care</h5>
+                                <p class="small text-white-50 mb-0">Trusted by 15,000+ students</p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 40px; height: 40px; opacity: 0.9;">
+                                    <i class="fas fa-heart text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <a href="#login-panel" class="btn btn-primary-gradient px-4 py-2 rounded-pill text-white shadow"><i class="fas fa-sign-in-alt me-2"></i>Sign In to Portal</a>
+                    <a href="#features" class="btn btn-light rounded-pill px-4 py-2 shadow-sm border" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(5px);">Explore Services <i class="fas fa-arrow-right ms-2 text-primary"></i></a>
+                </div>
+
+                <!-- Emergency Helpline Banner -->
+                <div class="p-2 px-3 rounded-4 d-inline-flex align-items-center gap-2 small border" style="background: rgba(220,53,69,0.06); border-color: rgba(220,53,69,0.2) !important;">
+                    <i class="fas fa-ambulance text-danger"></i>
+                    <span class="fw-semibold text-danger">24/7 Campus Emergency:</span>
+                    <span class="text-secondary">(012) 345-6789 / Campus Ext. 911</span>
+                </div>
+            </div>
+            
+            <!-- RIGHT SIDE: LOGIN CARD (premium floating) -->
+            <div class="col-lg-5 offset-lg-1 animate-up" id="login-panel">
+                <div class="login-glass p-4 p-xl-5">
+                    <div class="text-center mb-4">
+                        <div class="mx-auto bg-white rounded-circle d-inline-flex p-2 shadow-sm mb-2">
+                            <i class="fas fa-user-circle fa-3x" style="color: #1e2a5e;"></i>
+                        </div>
+                        <h3 class="fw-bold" style="color: #1e2a5e;">Welcome Back</h3>
+                        <p class="text-secondary">Sign in to manage appointments</p>
+                    </div>
+                    
+                    <!-- error / success messages -->
+                    <div id="errorAlert" class="alert alert-custom d-none" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i><span id="errorMessage"></span>
+                    </div>
+                    <div id="successAlert" class="alert alert-custom d-none" style="background: rgba(40,80,60,0.85);">
+                        <i class="fas fa-check-circle me-2"></i><span id="successMessage"></span>
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" id="loginForm" action="{% url 'accounts:login' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username / Student ID</label>
+                            <input type="text" class="form-control form-control-custom" name="username" id="username" placeholder="e.g., student01, admin, nurse01" required autocomplete="username">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="position-relative">
+                                <input type="password" class="form-control form-control-custom" name="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                                <i class="fas fa-eye-slash position-absolute end-0 top-50 translate-middle-y me-3" id="togglePassword" style="cursor: pointer; color: #7c7e8c;"></i>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                                <label class="form-check-label small" for="rememberMe">Keep me signed in</label>
+                            </div>
+                            <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none small" style="color:#6c5ce7;">Forgot password?</a>
+                        </div>
+                        
+                        <div id="attemptWarning" class="alert alert-warning d-none py-2 mb-3 small" style="background: #fff3cd; border-radius: 30px;">
+                            <i class="fas fa-exclamation-triangle me-1"></i> <span id="attemptCount"></span> failed attempt(s) · max 5
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-gradient w-100 text-white" id="loginBtn">
+                            <i class="fas fa-arrow-right-to-bracket me-2"></i> Sign in
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'accounts:register' %}" class="small text-decoration-none" style="color:#2c3e6e;">Create new account <i class="fas fa-chevron-right ms-1 fa-xs"></i></a>
+                        <span class="mx-2 text-muted">|</span>
+                        <a href="/contact-support/" class="small text-decoration-none" style="color:#2c3e6e;">Help desk</a>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Demo credentials - floating cards style -->
+                    <div>
+                        <p class="text-center small fw-semibold text-secondary mb-2"><i class="fas fa-magic me-1"></i> Quick Demo Roles</p>
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3">
+                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('admin', 'admin123')">
+                                    <span class="role-dot" style="background: #6c5ce7;"></span>
+                                    <span class="small fw-medium">Admin</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('nurse01', 'nurse123')">
+                                    <span class="role-dot" style="background: #00b894;"></span>
+                                    <span class="small">Nurse</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('psych01', 'psych123')">
+                                    <span class="role-dot" style="background: #fdcb6e;"></span>
+                                    <span class="small">Psychologist</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('student01', 'student123')">
+                                    <span class="role-dot" style="background: #0984e3;"></span>
+                                    <span class="small">Student</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center text-muted mt-2 mb-0" style="font-size: 0.7rem;">One‑click fill & login</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FEATURE CARDS (home section) -->
+    <div class="container mt-5 pt-4" id="features">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-4 py-2">why choose ccams</span>
+            <h2 class="display-6 fw-bold mt-2" style="color: #1e2a5e;">Comprehensive campus <br>health ecosystem</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="rounded-circle bg-white shadow-sm d-inline-flex p-3 mb-3"><i class="fas fa-calendar-alt fa-2x" style="color:#2c3e6e;"></i></div>
+                    <h5 class="fw-bold">Smart Scheduling</h5>
+                    <p class="text-secondary">Real-time availability, automated reminders, and rescheduling with zero friction.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="rounded-circle bg-white shadow-sm d-inline-flex p-3 mb-3"><i class="fas fa-brain fa-2x" style="color:#2c3e6e;"></i></div>
+                    <h5 class="fw-bold">Mental Wellness Hub</h5>
+                    <p class="text-secondary">Connect with psychologists, anonymous chat, and wellness resources available 24/7.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card p-4 h-100">
+                    <div class="rounded-circle bg-white shadow-sm d-inline-flex p-3 mb-3"><i class="fas fa-chart-line fa-2x" style="color:#2c3e6e;"></i></div>
+                    <h5 class="fw-bold">Health Analytics</h5>
+                    <p class="text-secondary">Track trends, vaccination records, and personalized health insights for students.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- about section / callout -->
+    <div class="container my-5 py-4" id="about">
+        <div class="row align-items-center bg-white bg-opacity-50 rounded-4 p-4 p-lg-5 shadow-sm">
+            <div class="col-md-7">
+                <h3 class="fw-bold" style="color:#1e2a5e;">Secure, modern & inclusive</h3>
+                <p class="lead text-secondary">CCAMS bridges the gap between campus medical staff and students. From routine checkups to counseling, we ensure privacy-first digital experience with seamless integration.</p>
+                <div class="d-flex gap-3 flex-wrap mt-3">
+                    <span><i class="fas fa-shield-alt text-primary me-1"></i> HIPAA Ready</span>
+                    <span><i class="fas fa-mobile-alt text-primary me-1"></i> Mobile Friendly</span>
+                    <span><i class="fas fa-headset text-primary me-1"></i> Priority Support</span>
+                </div>
+            </div>
+            <div class="col-md-5 text-center">
+                <i class="fas fa-hospital-user fa-5x opacity-25" style="color:#1e2a5e;"></i>
+                <p class="mt-2 fst-italic text-secondary">"Care that moves with you"</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark bg-opacity-5 mt-5 pt-5 pb-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5 class="fw-bold" style="color:#1e2a5e;">CCAMS</h5>
+                <p class="small text-secondary">Campus Clinic Appointment Management System — elevating student wellness through technology.</p>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h6 class="fw-semibold">Platform</h6>
+                <ul class="list-unstyled small"><li><a href="#" class="footer-link">Appointments</a></li><li><a href="#" class="footer-link">Telehealth</a></li><li><a href="#" class="footer-link">Records</a></li></ul>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h6 class="fw-semibold">Support</h6>
+                <ul class="list-unstyled small"><li><a href="#" class="footer-link">Help Center</a></li><li><a href="#" class="footer-link">Privacy</a></li><li><a href="#" class="footer-link">Status</a></li></ul>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h6 class="fw-semibold">Stay connected</h6>
+                <div class="d-flex gap-3"><i class="fab fa-twitter fa-lg" style="color:#4a5568;"></i><i class="fab fa-instagram fa-lg" style="color:#4a5568;"></i><i class="fab fa-linkedin fa-lg" style="color:#4a5568;"></i></div>
+                <p class="mt-2 small text-secondary">© 2026 CCAMS — Integrated Health Hub</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    if(togglePassword) {
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+            this.classList.toggle('fa-eye');
+        });
+    }
+    
+    // fill demo credentials + smooth feedback
+    window.fillCredentials = function(username, password) {
+        const userField = document.getElementById('username');
+        const passField = document.getElementById('password');
+        userField.value = username;
+        passField.value = password;
+        // highlight effect
+        userField.style.transition = '0.15s';
+        passField.style.transition = '0.15s';
+        userField.style.boxShadow = '0 0 0 3px rgba(108,92,231,0.3)';
+        passField.style.boxShadow = '0 0 0 3px rgba(108,92,231,0.3)';
+        setTimeout(() => {
+            userField.style.boxShadow = '';
+            passField.style.boxShadow = '';
+        }, 800);
+        showSuccess(`✓ ${username} credentials ready — click "Sign in"`);
+    };
+    
+    function showSuccess(message) {
+        const successAlert = document.getElementById('successAlert');
+        const successMsg = document.getElementById('successMessage');
+        successMsg.innerText = message;
+        successAlert.classList.remove('d-none');
+        setTimeout(() => successAlert.classList.add('d-none'), 2500);
+    }
+    
+    function showError(message) {
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMsgSpan = document.getElementById('errorMessage');
+        errorMsgSpan.innerText = message;
+        errorAlert.classList.remove('d-none');
+        setTimeout(() => errorAlert.classList.add('d-none'), 4000);
+    }
+    
+    // form validation + loading
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    if(loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if(!username || !password) {
+                e.preventDefault();
+                showError('Both username and password are required.');
+                return false;
+            }
+            if(password.length < 4) {
+                e.preventDefault();
+                showError('Password must be at least 4 characters.');
+                return false;
+            }
+            if(loginBtn) {
+                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Authenticating...';
+                loginBtn.disabled = true;
+                loginBtn.classList.add('opacity-75');
+            }
+            return true;
+        });
+    }
+    
+    // Remember me localstorage
+    const rememberCheck = document.getElementById('rememberMe');
+    const usernameEl = document.getElementById('username');
+    if(localStorage.getItem('ccams_remember_user')) {
+        usernameEl.value = localStorage.getItem('ccams_remember_user');
+        if(rememberCheck) rememberCheck.checked = true;
+    }
+    if(rememberCheck) {
+        rememberCheck.addEventListener('change', function() {
+            if(this.checked && usernameEl.value.trim()) {
+                localStorage.setItem('ccams_remember_user', usernameEl.value.trim());
+            } else if(!this.checked) {
+                localStorage.removeItem('ccams_remember_user');
+            }
+        });
+        usernameEl.addEventListener('input', function() {
+            if(rememberCheck.checked && this.value.trim()) {
+                localStorage.setItem('ccams_remember_user', this.value.trim());
+            }
+        });
+    }
+    
+    // attempt warning (demo only)
+    let attemptCount = parseInt(localStorage.getItem('loginAttemptCount') || '0');
+    const attemptDiv = document.getElementById('attemptWarning');
+    const attemptSpan = document.getElementById('attemptCount');
+    function updateAttemptUI() {
+        if(attemptDiv && attemptSpan) {
+            if(attemptCount > 0) {
+                attemptSpan.innerText = attemptCount;
+                attemptDiv.classList.remove('d-none');
+                if(attemptCount >= 4) attemptDiv.classList.add('bg-danger', 'bg-opacity-25');
+            } else {
+                attemptDiv.classList.add('d-none');
+                attemptDiv.classList.remove('bg-danger', 'bg-opacity-25');
+            }
+        }
+    }
+    updateAttemptUI();
+    // double click on demo card to reset attempts (nice UX)
+    const demoCardArea = document.querySelector('.login-glass .row.g-2');
+    if(demoCardArea) {
+        demoCardArea.addEventListener('dblclick', () => {
+            localStorage.setItem('loginAttemptCount', '0');
+            attemptCount = 0;
+            updateAttemptUI();
+            showSuccess('Attempt counter reset');
+        });
+    }
+    
+    // smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('href');
+            if(targetId !== "#" && targetId !== "" && targetId !== "#login-panel" && targetId !== "#features" && targetId !== "#about") {
+                const targetElem = document.querySelector(targetId);
+                if(targetElem) {
+                    e.preventDefault();
+                    targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+    // Theme Switcher Logic
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('ccams_theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const icon = document.getElementById('themeIcon');
+        if(icon) {
+            icon.className = theme === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
+        }
+    }
+
+    // Font Scaler Logic
+    const fontScales = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+    const fontLabels = {'font-sm': 'A-', 'font-md': 'A', 'font-lg': 'A+', 'font-xl': 'A++'};
+    
+    function cycleFontSize() {
+        const current = localStorage.getItem('ccams_font_scale') || 'font-md';
+        const nextIdx = (fontScales.indexOf(current) + 1) % fontScales.length;
+        const nextScale = fontScales[nextIdx];
+        document.documentElement.className = nextScale;
+        localStorage.setItem('ccams_font_scale', nextScale);
+        updateFontLabel(nextScale);
+    }
+
+    function updateFontLabel(scale) {
+        const label = document.getElementById('fontScaleLabel');
+        if(label) label.innerText = fontLabels[scale] || 'A';
+    }
+
+    // Live Clinic Status Logic
+    function updateClinicStatus() {
+        const pill = document.getElementById('clinicStatusPill');
+        const text = document.getElementById('clinicStatusText');
+        const dot = document.getElementById('clinicPulseDot');
+        if (!pill || !text || !dot) return;
+
+        const now = new Date();
+        const day = now.getDay();
+        const hour = now.getHours();
+        const isWeekday = (day >= 1 && day <= 5);
+        const isOpen = isWeekday && (hour >= 8 && hour < 17);
+
+        if (isOpen) {
+            dot.className = 'pulse-dot-wrapper pulse-green';
+            text.innerText = 'Open Today 08:00 - 17:00';
+            pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        } else {
+            dot.className = 'pulse-dot-wrapper pulse-amber';
+            text.innerText = isWeekday ? 'Closed (Opens 08:00)' : 'Closed for Weekend';
+            pill.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'light');
+        updateFontLabel(localStorage.getItem('ccams_font_scale') || 'font-md');
+        updateClinicStatus();
+        setInterval(updateClinicStatus, 60000);
+    });
+</script>
+</body>
+</html>

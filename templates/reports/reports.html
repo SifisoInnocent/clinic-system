@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CCAMS | Reports</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: modern mix -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* animated gradient background + soft noise */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(245, 248, 255, 0.98), rgba(235, 242, 255, 0.94));
+            z-index: -2;
+        }
+        
+        .animated-blob {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(100, 108, 255, 0.12), rgba(160, 130, 255, 0.05));
+            border-radius: 50%;
+            top: -20%;
+            right: -15%;
+            filter: blur(90px);
+            z-index: -1;
+            animation: floatBlob 26s infinite alternate ease-in-out;
+        }
+        
+        .animated-blob-2 {
+            position: fixed;
+            width: 55vw;
+            height: 55vw;
+            background: radial-gradient(circle, rgba(50, 200, 180, 0.1), rgba(80, 100, 220, 0.04));
+            border-radius: 50%;
+            bottom: -15%;
+            left: -10%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: floatBlob2 22s infinite alternate;
+        }
+        
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            100% { transform: translate(4%, 6%) scale(1.08); opacity: 0.9; }
+        }
+        
+        @keyframes floatBlob2 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -5%) scale(1.12); }
+        }
+
+        /* navbar premium */
+        .nav-premium {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+        
+        .brand-logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            background: linear-gradient(135deg, #1e2a5e, #2a3b7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        /* hero section */
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(145deg, #1a2a4f, #2c3e6e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        
+        .appointment-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(100, 108, 255, 0.3);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary-gradient {
+            background: linear-gradient(95deg, #1e2a5e, #2c3e6e);
+            border: none;
+            border-radius: 2rem;
+            padding: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+        
+        .btn-primary-gradient:hover {
+            background: linear-gradient(95deg, #2c3e6e, #1e2a5e);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 18px -8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            padding: 0.8rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #1e2a5e;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 0.2rem rgba(30, 42, 94, 0.25);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #1e2a5e;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .report-icon.appointment {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .report-icon.user {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .report-icon.statistics {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+<div class="hero-bg"></div>
+<div class="animated-blob"></div>
+<div class="animated-blob-2"></div>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand brand-logo fw-bold" href="{% url 'dashboard:dashboard' %}">
+            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'appointments:appointment_list' %}">Appointments</a></li>
+                {% if not is_student %}
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'availability:availability_list' %}">Schedule</a></li>
+                {% endif %}
+                {% if request.user.is_admin %}
+                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'accounts:user_list' %}">Users</a></li>
+                {% endif %}
+                <li class="nav-item"><a class="nav-link fw-semibold active" href="{% url 'reports:reports' %}">Reports</a></li>
+                <li class="nav-item ms-lg-2">
+                    <div class="dropdown">
+                        <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container pt-5 pb-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5 animate-up">
+        <div class="badge bg-light text-dark rounded-pill px-4 py-2 mb-3 shadow-sm">
+            <i class="fas fa-chart-bar me-2"></i>{% if is_student %}Student{% elif is_staff %}Staff{% else %}Admin{% endif %} Portal
+        </div>
+        <h1 class="hero-title mb-3">Reports</h1>
+        <p class="text-secondary-emphasis fs-5" style="color: #2d3a4a;">Generate comprehensive reports and statistics</p>
+    </div>
+
+    <!-- Report Cards -->
+    <div class="row g-4">
+        <!-- Appointment Reports -->
+        <div class="col-lg-6 animate-up" style="animation-delay: 0.1s;">
+            <div class="appointment-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="report-icon appointment">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Appointment Reports</h5>
+                        <p class="text-secondary mb-0">Generate appointment analytics</p>
+                    </div>
+                </div>
+                
+                <form method="post" action="{% url 'reports:appointment_report' %}">
+                    {% csrf_token %}
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="date_from" class="form-label">From Date</label>
+                            <input type="date" name="date_from" class="form-control" id="apt_date_from">
+                        </div>
+                        <div class="col-6">
+                            <label for="date_to" class="form-label">To Date</label>
+                            <input type="date" name="date_to" class="form-control" id="apt_date_to">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="report_type" class="form-label">Filter Status</label>
+                        <select name="report_type" class="form-select">
+                            <option value="all">All Appointments</option>
+                            <option value="bookings">Bookings (Pending/Confirmed)</option>
+                            <option value="completed">Completed Appointments</option>
+                            <option value="cancellations">Cancellations</option>
+                            <option value="no_shows">No-Shows</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Output Format</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="apt_fmt_html" value="html" checked>
+                                <label class="form-check-label" for="apt_fmt_html"><i class="fas fa-eye me-1"></i> Preview</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="apt_fmt_pdf" value="pdf">
+                                <label class="form-check-label" for="apt_fmt_pdf"><i class="fas fa-file-pdf text-danger me-1"></i> PDF</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="apt_fmt_csv" value="csv">
+                                <label class="form-check-label" for="apt_fmt_csv"><i class="fas fa-file-csv text-success me-1"></i> CSV</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-gradient w-100 text-white rounded-pill">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Generate Report
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- User Reports -->
+        <div class="col-lg-6 animate-up" style="animation-delay: 0.2s;">
+            <div class="appointment-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="report-icon user">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: #1e2a5e;">User Reports</h5>
+                        <p class="text-secondary mb-0">Generate user analytics</p>
+                    </div>
+                </div>
+                
+                <form method="post" action="{% url 'reports:user_report' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="user_type" class="form-label">User Category</label>
+                        <select name="user_type" class="form-select">
+                            <option value="all">All Users</option>
+                            <option value="students">Students</option>
+                            <option value="staff">Staff (Nurses & Psychologists)</option>
+                            <option value="admins">Administrators</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Output Format</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="usr_fmt_html" value="html" checked>
+                                <label class="form-check-label" for="usr_fmt_html"><i class="fas fa-eye me-1"></i> Preview</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="usr_fmt_pdf" value="pdf">
+                                <label class="form-check-label" for="usr_fmt_pdf"><i class="fas fa-file-pdf text-danger me-1"></i> PDF</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="format" id="usr_fmt_csv" value="csv">
+                                <label class="form-check-label" for="usr_fmt_csv"><i class="fas fa-file-csv text-success me-1"></i> CSV</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-gradient w-100 text-white rounded-pill">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Generate Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Report -->
+    <div class="row g-4 mt-2">
+        <div class="col-12 animate-up" style="animation-delay: 0.3s;">
+            <div class="appointment-card p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="report-icon statistics">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Statistics Reports</h5>
+                        <p class="text-secondary mb-0">Generate comprehensive statistics</p>
+                    </div>
+                </div>
+                
+                <form method="post" action="{% url 'reports:statistics_report' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">From Date</label>
+                            <input type="date" name="date_from" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">To Date</label>
+                            <input type="date" name="date_to" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="report_type" class="form-label">Report Type</label>
+                            <select name="report_type" class="form-select">
+                                <option value="daily">Daily Statistics</option>
+                                <option value="weekly">Weekly Statistics</option>
+                                <option value="monthly">Monthly Statistics</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-gradient px-5 text-white rounded-pill">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Generate Statistics Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unattended & Analytics Links -->
+    <div class="row g-4 mt-2">
+        <div class="col-lg-6 animate-up" style="animation-delay: 0.4s;">
+            <div class="appointment-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="report-icon appointment bg-danger text-white">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Unattended Appointments</h5>
+                        <p class="text-secondary mb-0">View students with multiple no-shows</p>
+                    </div>
+                </div>
+                <a href="{% url 'reports:unattended_report' %}" class="btn btn-outline-danger w-100 rounded-pill">
+                    <i class="fas fa-eye me-2"></i> View Unattended Report
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 animate-up" style="animation-delay: 0.5s;">
+            <div class="appointment-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="report-icon statistics bg-info text-white">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: #1e2a5e;">Page Analytics</h5>
+                        <p class="text-secondary mb-0">View system-wide page analytics</p>
+                    </div>
+                </div>
+                <a href="{% url 'analytics:dashboard' %}" class="btn btn-outline-info w-100 rounded-pill">
+                    <i class="fas fa-chart-bar me-2"></i> View Analytics Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add smooth animations on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-up').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+</body>
+</html>
