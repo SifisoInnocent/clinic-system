@@ -37,7 +37,7 @@ class Availability(models.Model):
     
     def clean(self):
         # Validate that staff is actually staff
-        if self.staff and not self.staff.is_staff_user():
+        if hasattr(self, 'staff_id') and self.staff_id and not self.staff.is_staff_user():
             raise ValidationError("Selected user is not staff (nurse or psychologist)")
         
         # Validate time range
@@ -86,7 +86,7 @@ class BlockedPeriod(models.Model):
     
     def clean(self):
         # Validate that staff is actually staff
-        if self.staff and not self.staff.is_staff_user():
+        if hasattr(self, 'staff_id') and self.staff_id and not self.staff.is_staff_user():
             raise ValidationError("Selected user is not staff (nurse or psychologist)")
         
         # Validate datetime range
