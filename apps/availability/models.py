@@ -45,7 +45,7 @@ class Availability(models.Model):
             raise ValidationError("Start time must be before end time")
         
         # Check for overlapping availability
-        if self.staff and self.day_of_week and self.start_time and self.end_time:
+        if hasattr(self, 'staff_id') and self.staff_id and self.day_of_week and self.start_time and self.end_time:
             overlapping = Availability.objects.filter(
                 staff=self.staff,
                 day_of_week=self.day_of_week,
@@ -94,7 +94,7 @@ class BlockedPeriod(models.Model):
             raise ValidationError("Start datetime must be before end datetime")
         
         # Check for overlapping blocked periods
-        if self.staff and self.start_datetime and self.end_datetime:
+        if hasattr(self, 'staff_id') and self.staff_id and self.start_datetime and self.end_datetime:
             overlapping = BlockedPeriod.objects.filter(
                 staff=self.staff,
                 start_datetime__lt=self.end_datetime,

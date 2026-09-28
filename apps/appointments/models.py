@@ -56,22 +56,22 @@ class Appointment(models.Model):
     
     def clean(self):
         # Validate that student is actually a student
-        if self.student and not self.student.is_student():
+        if hasattr(self, 'student_id') and self.student_id and not self.student.is_student():
             raise ValidationError("Selected user is not a student")
         
         # Validate that staff is actually staff
-        if self.staff and not self.staff.is_staff_user():
+        if hasattr(self, 'staff_id') and self.staff_id and not self.staff.is_staff_user():
             raise ValidationError("Selected user is not staff (nurse or psychologist)")
         
         # Validate provider type matches staff role
-        if self.staff and self.provider_type:
+        if hasattr(self, 'staff_id') and self.staff_id and self.provider_type:
             if self.provider_type == 'nurse' and not self.staff.is_nurse():
                 raise ValidationError("Provider type 'Nurse' does not match staff role")
             if self.provider_type == 'psychologist' and not self.staff.is_psychologist():
                 raise ValidationError("Provider type 'Psychologist' does not match staff role")
         
         # Check for double booking
-        if self.staff and self.appointment_date and self.appointment_time:
+        if hasattr(self, 'staff_id') and self.staff_id and self.appointment_date and self.appointment_time:
             existing = Appointment.objects.filter(
                 staff=self.staff,
                 appointment_date=self.appointment_date,
