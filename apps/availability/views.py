@@ -33,20 +33,32 @@ def availability_create_view(request):
         if form.is_valid():
             availability = form.save(commit=False)
             availability.staff = request.user
-            availability.save()
             
-            # Log availability creation
-            AuditLog.log_action(
-                admin=request.user,
-                action='create_availability',
-                target_object=f'Availability for {availability.get_day_of_week_display()}',
-                description=f"Staff {request.user.username} created availability: {availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}",
-                ip_address=get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')
-            )
-            
-            messages.success(request, 'Availability has been created successfully!')
-            return redirect('availability:availability_list')
+            try:
+                # This will call full_clean() inside save()
+                availability.save()
+                
+                # Log availability creation
+                AuditLog.log_action(
+                    admin=request.user,
+                    action='create_availability',
+                    target_object=f'Availability for {availability.get_day_of_week_display()}',
+                    description=f"Staff {request.user.username} created availability: {availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}",
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
+                
+                messages.success(request, 'Availability has been created successfully!')
+                return redirect('availability:availability_list')
+            except Exception as e:
+                # Catch ValidationError from model full_clean()
+                from django.core.exceptions import ValidationError
+                if isinstance(e, ValidationError):
+                    for field, errs in e.message_dict.items() if hasattr(e, 'message_dict') else [(None, e.messages)]:
+                        for err in errs:
+                            form.add_error(field if field != '__all__' else None, err)
+                else:
+                    form.add_error(None, f"Error saving availability: {e}")
     else:
         form = AvailabilityForm()
     
@@ -65,20 +77,30 @@ def availability_edit_view(request, availability_id):
         form = AvailabilityForm(request.POST, instance=availability)
         if form.is_valid():
             old_values = f"{availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}"
-            form.save()
             
-            # Log availability update
-            AuditLog.log_action(
-                admin=request.user,
-                action='update_availability',
-                target_object=f'Availability for {availability.get_day_of_week_display()}',
-                description=f"Staff {request.user.username} updated availability: {old_values} to {availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}",
-                ip_address=get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')
-            )
-            
-            messages.success(request, 'Availability has been updated successfully!')
-            return redirect('availability:availability_list')
+            try:
+                form.save()
+                
+                # Log availability update
+                AuditLog.log_action(
+                    admin=request.user,
+                    action='update_availability',
+                    target_object=f'Availability for {availability.get_day_of_week_display()}',
+                    description=f"Staff {request.user.username} updated availability: {old_values} to {availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}",
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
+                
+                messages.success(request, 'Availability has been updated successfully!')
+                return redirect('availability:availability_list')
+            except Exception as e:
+                from django.core.exceptions import ValidationError
+                if isinstance(e, ValidationError):
+                    for field, errs in e.message_dict.items() if hasattr(e, 'message_dict') else [(None, e.messages)]:
+                        for err in errs:
+                            form.add_error(field if field != '__all__' else None, err)
+                else:
+                    form.add_error(None, f"Error saving availability: {e}")
     else:
         form = AvailabilityForm(instance=availability)
     
@@ -151,6 +173,7 @@ def availability_bulk_create_view(request):
             end_time = form.cleaned_data['end_time']
             
             created_count = 0
+            errors = []
             for day in days:
                 # Check if availability already exists
                 existing = Availability.objects.filter(
@@ -161,26 +184,46 @@ def availability_bulk_create_view(request):
                 ).first()
                 
                 if not existing:
-                    Availability.objects.create(
-                        staff=request.user,
-                        day_of_week=day,
-                        start_time=start_time,
-                        end_time=end_time
-                    )
-                    created_count += 1
+                    try:
+                        avail = Availability(
+                            staff=request.user,
+                            day_of_week=day,
+                            start_time=start_time,
+                            end_time=end_time
+                        )
+                        avail.save()
+                        created_count += 1
+                    except Exception as e:
+                        from django.core.exceptions import ValidationError
+                        if isinstance(e, ValidationError):
+                            # Collect error messages
+                            msgs = []
+                            if hasattr(e, 'message_dict'):
+                                for f, errs in e.message_dict.items():
+                                    msgs.extend(errs)
+                            else:
+                                msgs.extend(e.messages)
+                            day_name = dict(Availability.DAY_CHOICES).get(int(day), day)
+                            errors.append(f"{day_name}: {', '.join(msgs)}")
             
-            # Log bulk creation
-            AuditLog.log_action(
-                admin=request.user,
-                action='create_availability',
-                target_object=f'Bulk Availability',
-                description=f"Staff {request.user.username} created {created_count} availability slots",
-                ip_address=get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')
-            )
+            if created_count > 0:
+                # Log bulk creation
+                AuditLog.log_action(
+                    admin=request.user,
+                    action='create_availability',
+                    target_object=f'Bulk Availability',
+                    description=f"Staff {request.user.username} created {created_count} availability slots",
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
+                messages.success(request, f'{created_count} availability slots have been created successfully!')
             
-            messages.success(request, f'{created_count} availability slots have been created successfully!')
-            return redirect('availability:availability_list')
+            if errors:
+                for err in errors:
+                    messages.error(request, err)
+                
+            if created_count > 0 and not errors:
+                return redirect('availability:availability_list')
     else:
         form = AvailabilityBulkForm()
     
