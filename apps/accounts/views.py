@@ -273,9 +273,14 @@ def register_view(request):
         
         # Create user manually to bypass validation
         username = request.POST.get('username', '')
-        password = request.POST.get('password1', '')
+        # Try both password and password1 depending on form structure
+        password = request.POST.get('password') or request.POST.get('password1', '')
         
         if username and password:
+            # Handle unique constraints: empty strings must be converted to None
+            student_num = request.POST.get('student_number', '').strip() or None
+            emp_id = request.POST.get('employee_id', '').strip() or None
+            
             try:
                 # Check if user already exists
                 if User.objects.filter(username=username).exists():
@@ -286,8 +291,8 @@ def register_view(request):
                     user.first_name = request.POST.get('first_name', user.first_name or '')
                     user.last_name = request.POST.get('last_name', user.last_name or '')
                     user.role = request.POST.get('role', user.role or 'student')
-                    user.student_number = request.POST.get('student_number', user.student_number or '')
-                    user.employee_id = request.POST.get('employee_id', user.employee_id or '')
+                    user.student_number = student_num if student_num else user.student_number
+                    user.employee_id = emp_id if emp_id else user.employee_id
                     user.phone_number = request.POST.get('phone_number', user.phone_number or '')
                     user.is_active = True
                     user.save()
@@ -300,8 +305,8 @@ def register_view(request):
                         first_name=request.POST.get('first_name', ''),
                         last_name=request.POST.get('last_name', ''),
                         role=request.POST.get('role', 'student'),
-                        student_number=request.POST.get('student_number', ''),
-                        employee_id=request.POST.get('employee_id', ''),
+                        student_number=student_num,
+                        employee_id=emp_id,
                         phone_number=request.POST.get('phone_number', '')
                     )
                 
@@ -317,12 +322,13 @@ def register_view(request):
                 messages.success(request, 'Account created successfully! You can now log in.')
                 return redirect('/accounts/login/')
             except Exception as e:
-                # If user creation fails, try to create a minimal user
+                # If user creation fails, log the error and try to create a minimal user with the requested role
+                print(f"Error creating user: {e}")
                 try:
                     user = User.objects.create_user(
                         username=username,
                         password=password,
-                        role='student'
+                        role=request.POST.get('role', 'student')
                     )
                     messages.success(request, 'Account created successfully! You can now log in.')
                     return redirect('/accounts/login/')

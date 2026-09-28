@@ -49,12 +49,12 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_student_number(self):
         student_number = self.cleaned_data.get('student_number')
         # Allow duplicate student numbers for easier registration
-        return student_number
+        return student_number if student_number else None
     
     def clean_employee_id(self):
         employee_id = self.cleaned_data.get('employee_id')
         # Allow duplicate employee IDs for easier registration
-        return employee_id
+        return employee_id if employee_id else None
 
 
 class CustomAuthenticationForm(forms.Form):
@@ -148,13 +148,13 @@ class UserCreateForm(forms.ModelForm):
         student_number = self.cleaned_data.get('student_number')
         if student_number and User.objects.filter(student_number=student_number).exists():
             raise ValidationError('A user with that student number already exists.')
-        return student_number
+        return student_number if student_number else None
     
     def clean_employee_id(self):
         employee_id = self.cleaned_data.get('employee_id')
         if employee_id and User.objects.filter(employee_id=employee_id).exists():
             raise ValidationError('A user with that employee ID already exists.')
-        return employee_id
+        return employee_id if employee_id else None
     
     def save(self, commit=True):
         user = super().save(commit=False)
