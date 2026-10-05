@@ -1,1 +1,1 @@
-web: gunicorn ccams.wsgi --log-file -
+web: python manage.py migrate --noinput && python manage.py seed_data && python manage.py collectstatic --noinput && gunicorn ccams.wsgi --log-file -

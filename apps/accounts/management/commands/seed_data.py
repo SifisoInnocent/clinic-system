@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.db import connection
 
 from apps.accounts.models import UserProfile
 from apps.availability.models import Availability, BlockedPeriod
@@ -18,6 +19,108 @@ class Command(BaseCommand):
         """Create initial users, availability, and sample data"""
         
         self.stdout.write('Creating initial data...')
+        
+        # Check if new columns exist in database (handle both SQLite and PostgreSQL)
+        with connection.cursor() as cursor:
+            # Check database type
+            db_vendor = connection.vendor
+            
+            if db_vendor == 'sqlite':
+                cursor.execute("PRAGMA table_info(availability)")
+                columns = [column[1] for column in cursor.fetchall()]
+                has_session_length = 'session_length' in columns
+                has_buffer_time = 'buffer_time' in columns
+                
+                if not has_session_length:
+                    cursor.execute('ALTER TABLE availability ADD COLUMN session_length INTEGER DEFAULT 60')
+                    self.stdout.write(self.style.WARNING('Added session_length column to availability'))
+                if not has_buffer_time:
+                    cursor.execute('ALTER TABLE availability ADD COLUMN buffer_time INTEGER DEFAULT 15')
+                    self.stdout.write(self.style.WARNING('Added buffer_time column to availability'))
+                
+                cursor.execute("PRAGMA table_info(appointments)")
+                columns = [column[1] for column in cursor.fetchall()]
+                has_session_notes = 'session_notes' in columns
+                
+                if not has_session_notes:
+                    cursor.execute('ALTER TABLE appointments ADD COLUMN session_notes TEXT')
+                    self.stdout.write(self.style.WARNING('Added session_notes column to appointments'))
+                
+                # Check if follow_up_tasks table exists
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='follow_up_tasks'")
+                if not cursor.fetchone():
+                    cursor.execute('''
+                        CREATE TABLE follow_up_tasks (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            appointment_id INTEGER NOT NULL,
+                            assigned_to_id INTEGER NOT NULL,
+                            status VARCHAR(20) DEFAULT 'pending',
+                            due_date DATE NOT NULL,
+                            notes TEXT,
+                            created_at DATETIME NOT NULL,
+                            updated_at DATETIME NOT NULL,
+                            FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id),
+                            FOREIGN KEY (assigned_to_id) REFERENCES auth_user(id)
+                        )
+                    ''')
+                    self.stdout.write(self.style.WARNING('Created follow_up_tasks table'))
+            elif db_vendor == 'postgresql':
+                # PostgreSQL-specific checks
+                cursor.execute("""
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'availability' AND column_name = 'session_length'
+                """)
+                has_session_length = cursor.fetchone() is not None
+                
+                if not has_session_length:
+                    cursor.execute('ALTER TABLE availability ADD COLUMN session_length INTEGER DEFAULT 60')
+                    self.stdout.write(self.style.WARNING('Added session_length column to availability'))
+                
+                cursor.execute("""
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'availability' AND column_name = 'buffer_time'
+                """)
+                has_buffer_time = cursor.fetchone() is not None
+                
+                if not has_buffer_time:
+                    cursor.execute('ALTER TABLE availability ADD COLUMN buffer_time INTEGER DEFAULT 15')
+                    self.stdout.write(self.style.WARNING('Added buffer_time column to availability'))
+                
+                cursor.execute("""
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'appointments' AND column_name = 'session_notes'
+                """)
+                has_session_notes = cursor.fetchone() is not None
+                
+                if not has_session_notes:
+                    cursor.execute('ALTER TABLE appointments ADD COLUMN session_notes TEXT')
+                    self.stdout.write(self.style.WARNING('Added session_notes column to appointments'))
+                
+                # Check if follow_up_tasks table exists
+                cursor.execute("""
+                    SELECT table_name 
+                    FROM information_schema.tables 
+                    WHERE table_name = 'follow_up_tasks'
+                """)
+                if not cursor.fetchone():
+                    cursor.execute('''
+                        CREATE TABLE follow_up_tasks (
+                            id SERIAL PRIMARY KEY,
+                            appointment_id INTEGER NOT NULL,
+                            assigned_to_id INTEGER NOT NULL,
+                            status VARCHAR(20) DEFAULT 'pending',
+                            due_date DATE NOT NULL,
+                            notes TEXT,
+                            created_at TIMESTAMP NOT NULL,
+                            updated_at TIMESTAMP NOT NULL,
+                            FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id),
+                            FOREIGN KEY (assigned_to_id) REFERENCES auth_user(id)
+                        )
+                    ''')
+                    self.stdout.write(self.style.WARNING('Created follow_up_tasks table'))
         
         # Create admin user
         if not User.objects.filter(username='admin').exists():
@@ -126,7 +229,7 @@ class Command(BaseCommand):
                 day_of_week=day,
                 start_time='08:00',
                 end_time='16:00',
-                defaults={'is_active': True}
+                defaults={'is_active': True, 'session_length': 60, 'buffer_time': 15}
             )
         
         # Psychologist availability (Monday-Friday 9AM-5PM)
@@ -136,7 +239,7 @@ class Command(BaseCommand):
                 day_of_week=day,
                 start_time='09:00',
                 end_time='17:00',
-                defaults={'is_active': True}
+                defaults={'is_active': True, 'session_length': 60, 'buffer_time': 15}
             )
         
         self.stdout.write(self.style.SUCCESS('Created staff availability'))
