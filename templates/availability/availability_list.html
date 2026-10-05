@@ -187,43 +187,153 @@
 
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg nav-premium sticky-top py-3">
-    <div class="container">
-        <a class="navbar-brand brand-logo fw-bold" href="{% url 'dashboard:dashboard' %}">
-            <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
-        </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
-                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'appointments:appointment_list' %}">Appointments</a></li>
-                <li class="nav-item"><a class="nav-link fw-semibold active" href="{% url 'availability:availability_list' %}">Schedule</a></li>
-                {% if request.user.is_admin %}
-                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'accounts:user_list' %}">Users</a></li>
-                <li class="nav-item"><a class="nav-link fw-semibold" href="{% url 'reports:reports' %}">Reports</a></li>
-                {% endif %}
-                <li class="nav-item ms-lg-2">
-                    <div class="dropdown">
-                        <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
+        <div class="container">
+            <a class="navbar-brand brand-logo fw-bold d-flex align-items-center" href="{% url 'dashboard:dashboard' %}">
+                <i class="fas fa-stethoscope me-2" style="color: #2c3e6e;"></i> CCAMS
+                <span class="clinic-status-pill ms-3 d-none d-sm-inline-flex" id="clinicStatusPill" title="Campus Clinic Hours: Mon-Fri 08:00 - 17:00">
+                    <span class="pulse-dot-wrapper pulse-green" id="clinicPulseDot"><span class="pulse-ring"></span><span class="pulse-dot"></span></span>
+                    <span id="clinicStatusText">Open Now</span>
+                </span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-center">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold {% if request.resolver_match.url_name == 'appointment_list' %}active{% endif %}" href="{% url 'appointments:appointment_list' %}">Appointments</a>
+                        </li>
+                        {% if user.is_student %}
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold {% if request.resolver_match.url_name == 'appointment_book' %}active{% endif %}" href="{% url 'appointments:appointment_book' %}">Book</a>
+                            </li>
+                        {% endif %}
+                        {% if user.is_staff_user %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle {% if request.resolver_match.app_name == 'availability' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
+                                    Schedule
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'availability:availability_list' %}"><i class="fas fa-clock me-2"></i>My Working Hours</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:availability_add' %}"><i class="fas fa-plus-circle me-2"></i>Add Working Hours</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:availability_bulk_create' %}"><i class="fas fa-calendar-week me-2"></i>Bulk Setup</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_list' %}"><i class="fas fa-ban me-2"></i>Blocked Periods</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_create' %}"><i class="fas fa-calendar-times me-2"></i>Block Time</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if user.is_admin %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Users
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'accounts:user_list' %}"><i class="fas fa-users-cog me-2"></i>Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'accounts:user_create' %}"><i class="fas fa-user-plus me-2"></i>Create User</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Clinic
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_list' %}"><i class="fas fa-ban me-2"></i>Blocked Periods</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'availability:blocked_period_create' %}"><i class="fas fa-calendar-times me-2"></i>Create Blocked Period</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Reports
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'reports:reports' %}"><i class="fas fa-file-invoice me-2"></i>Generate Reports</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'reports:statistics_report' %}"><i class="fas fa-chart-line me-2"></i>Statistics</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold" href="{% url 'audit:audit_log' %}">Audit Log</a>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Notification Center Bell -->
+                        <li class="nav-item dropdown position-relative">
+                            <a class="nav-link position-relative px-2" href="#" id="notifBellDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                                <i class="fas fa-bell fa-lg"></i>
+                                <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
+                                    0
+                                </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0 notif-dropdown" aria-labelledby="notifBellDropdown">
+                                <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: var(--nav-bg, rgba(255,255,255,0.9));">
+                                    <h6 class="fw-bold mb-0" style="color: var(--text-primary);"><i class="fas fa-bell me-2 text-primary"></i>Notifications</h6>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" onclick="markAllNotificationsReadDropdown()" title="Mark all read">
+                                        <small>Mark all read</small>
+                                    </button>
+                                </div>
+                                <div id="notifListDropdown" class="py-1" style="max-height: 320px; overflow-y: auto;">
+                                    <div class="text-center py-4 text-muted">
+                                        <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+                                    </div>
+                                </div>
+                                <div class="p-2 border-top text-center" style="background: var(--nav-bg, rgba(255,255,255,0.9));">
+                                    <a href="{% url 'notifications:notification_list' %}" class="small text-decoration-none fw-semibold">
+                                        View all notifications <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Universal Command Palette Trigger (Ctrl+K) -->
+                        <li class="nav-item d-none d-md-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-flex align-items-center gap-2" onclick="openCommandPalette()" title="Command Palette (Ctrl + K)">
+                                <i class="fas fa-search text-muted fa-xs"></i>
+                                <span class="small">Search</span>
+                                <kbd class="cmd-kbd">Ctrl K</kbd>
+                            </button>
+                        </li>
+
+                        <!-- Accessibility Controls -->
+                        <li class="nav-item d-flex align-items-center gap-1">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" id="themeToggleBtn" style="width: 34px; height: 34px;" title="Toggle High-Contrast / Dark Mode" onclick="toggleTheme()">
+                                <i class="fas fa-moon" id="themeIcon"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 small fw-bold" id="fontScaleBtn" style="font-size: 0.75rem;" title="Adjust Text Size (WCAG 2.1)" onclick="cycleFontSize()">
+                                <span id="fontScaleLabel">A</span>
+                            </button>
+                        </li>
+                        
+                        <li class="nav-item ms-lg-2">
+                            <div class="dropdown">
+                                <a class="btn btn-outline-dark rounded-pill px-4 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user me-2"></i>{{ user.get_full_name|default:user.username }}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'notifications:notification_list' %}"><i class="fas fa-bell me-2"></i>Notification Center</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" href="{% url 'accounts:login' %}">Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 <main class="container pt-5 pb-5">
     <!-- Hero Section -->
     <div class="text-center mb-5 animate-up">
         <div class="badge bg-light text-dark rounded-pill px-4 py-2 mb-3 shadow-sm">
-            <i class="fas fa-clock me-2"></i>{% if is_student %}Student{% elif is_staff %}Staff{% else %}Admin{% endif %} Portal
+            <i class="fas fa-clock me-2"></i>{% if user.is_student %}Student{% elif user.is_staff_user %}Staff{% else %}Admin{% endif %} Portal
         </div>
         <h1 class="hero-title mb-3">Manage Availability</h1>
         <p class="text-secondary-emphasis fs-5" style="color: #2d3a4a;">Set and manage your work schedule</p>
@@ -319,3 +429,4 @@
 </script>
 </body>
 </html>
+

@@ -51,19 +51,19 @@
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-center">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link fw-semibold" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+                            <a class="nav-link fw-semibold {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:dashboard' %}">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fw-semibold" href="{% url 'appointments:appointment_list' %}">Appointments</a>
+                            <a class="nav-link fw-semibold {% if request.resolver_match.url_name == 'appointment_list' %}active{% endif %}" href="{% url 'appointments:appointment_list' %}">Appointments</a>
                         </li>
                         {% if user.is_student %}
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold" href="{% url 'appointments:appointment_book' %}">Book Appointment</a>
+                                <a class="nav-link fw-semibold {% if request.resolver_match.url_name == 'appointment_book' %}active{% endif %}" href="{% url 'appointments:appointment_book' %}">Book</a>
                             </li>
                         {% endif %}
                         {% if user.is_staff_user %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <a class="nav-link fw-semibold dropdown-toggle {% if request.resolver_match.app_name == 'availability' %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
                                     Schedule
                                 </a>
                                 <ul class="dropdown-menu">
