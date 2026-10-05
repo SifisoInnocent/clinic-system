@@ -566,8 +566,44 @@
     // form validation + loading
     const loginForm = document.getElementById('loginForm');
     const loginBtn = document.getElementById('loginBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    
+    // Auto-clear fields after 10 seconds of inactivity
+    let autoClearTimer;
+    let hasInteracted = false;
+    
+    function resetAutoClearTimer() {
+        clearTimeout(autoClearTimer);
+        autoClearTimer = setTimeout(() => {
+            if (!hasInteracted || loginForm.dataset.submitted === 'true') return;
+            
+            // Only clear if fields have content
+            if (usernameInput.value || passwordInput.value) {
+                usernameInput.value = '';
+                passwordInput.value = '';
+                showSuccess('Fields auto-cleared for security');
+            }
+        }, 10000); // 10 seconds
+    }
+    
+    // Reset timer on input changes
+    usernameInput.addEventListener('input', () => {
+        hasInteracted = true;
+        resetAutoClearTimer();
+    });
+    
+    passwordInput.addEventListener('input', () => {
+        hasInteracted = true;
+        resetAutoClearTimer();
+    });
+    
+    // Clear timer and mark as submitted on form submit
     if(loginForm) {
         loginForm.addEventListener('submit', function(e) {
+            clearTimeout(autoClearTimer);
+            loginForm.dataset.submitted = 'true';
+            
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             if(!username || !password) {
@@ -588,6 +624,9 @@
             return true;
         });
     }
+    
+    // Start timer on page load
+    resetAutoClearTimer();
     
     // Remember me localstorage
     const rememberCheck = document.getElementById('rememberMe');
@@ -650,6 +689,9 @@
                     targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
+        });
+    });
+    
     // Theme Switcher Logic
     function toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
