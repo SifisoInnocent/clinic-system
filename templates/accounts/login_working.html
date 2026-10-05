@@ -569,7 +569,7 @@
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     
-    // Auto-clear fields after 10 seconds of inactivity
+    // Auto-clear fields after 35 seconds of inactivity
     let autoClearTimer;
     let hasInteracted = false;
     
@@ -584,7 +584,7 @@
                 passwordInput.value = '';
                 showSuccess('Fields auto-cleared for security');
             }
-        }, 10000); // 10 seconds
+        }, 35000); // 35 seconds
     }
     
     // Reset timer on input changes
