@@ -374,60 +374,42 @@
         </div>
     </div>
 
-    <!-- Monthly Statistics -->
+    <!-- Actionable Statistics -->
     <div class="row g-3 mb-5">
-        <div class="col-md-2 animate-up" style="animation-delay: 0.1s;">
+        <div class="col-md-3 animate-up" style="animation-delay: 0.1s;">
             <div class="stat-card p-3 text-center">
                 <div class="mb-2">
-                    <i class="fas fa-calendar-alt fa-2x" style="color: #17a2b8;"></i>
+                    <i class="fas fa-user-clock fa-2x" style="color: #17a2b8;"></i>
                 </div>
-                <h4 class="fw-bold mb-1" style="color: #17a2b8;">{{ total_month }}</h4>
-                <p class="text-secondary mb-0 small">Monthly Total</p>
+                <h4 class="fw-bold mb-1" style="color: #17a2b8;">{% if today_appointments %}{{ today_appointments.0.appointment_time|time:"H:i" }}{% else %}--:--{% endif %}</h4>
+                <p class="text-secondary mb-0 small">Next Patient</p>
             </div>
         </div>
-        <div class="col-md-2 animate-up" style="animation-delay: 0.2s;">
+        <div class="col-md-3 animate-up" style="animation-delay: 0.2s;">
             <div class="stat-card p-3 text-center">
                 <div class="mb-2">
-                    <i class="fas fa-clock fa-2x" style="color: #ffc107;"></i>
+                    <i class="fas fa-exclamation-circle fa-2x" style="color: #ffc107;"></i>
                 </div>
                 <h4 class="fw-bold mb-1" style="color: #ffc107;">{{ pending_month }}</h4>
-                <p class="text-secondary mb-0 small">Pending</p>
+                <p class="text-secondary mb-0 small">Needs Action</p>
             </div>
         </div>
-        <div class="col-md-2 animate-up" style="animation-delay: 0.3s;">
+        <div class="col-md-3 animate-up" style="animation-delay: 0.3s;">
             <div class="stat-card p-3 text-center">
                 <div class="mb-2">
-                    <i class="fas fa-check fa-2x" style="color: #007bff;"></i>
+                    <i class="fas fa-calendar-check fa-2x" style="color: #28a745;"></i>
                 </div>
-                <h4 class="fw-bold mb-1" style="color: #007bff;">{{ confirmed_month }}</h4>
-                <p class="text-secondary mb-0 small">Confirmed</p>
+                <h4 class="fw-bold mb-1" style="color: #28a745;">{{ confirmed_month }}</h4>
+                <p class="text-secondary mb-0 small">Today's Confirmed</p>
             </div>
         </div>
-        <div class="col-md-2 animate-up" style="animation-delay: 0.4s;">
-            <div class="stat-card p-3 text-center">
-                <div class="mb-2">
-                    <i class="fas fa-check-circle fa-2x" style="color: #28a745;"></i>
-                </div>
-                <h4 class="fw-bold mb-1" style="color: #28a745;">{{ completed_month }}</h4>
-                <p class="text-secondary mb-0 small">Completed</p>
-            </div>
-        </div>
-        <div class="col-md-2 animate-up" style="animation-delay: 0.5s;">
-            <div class="stat-card p-3 text-center">
-                <div class="mb-2">
-                    <i class="fas fa-times fa-2x" style="color: #6c757d;"></i>
-                </div>
-                <h4 class="fw-bold mb-1" style="color: #6c757d;">{{ cancelled_month }}</h4>
-                <p class="text-secondary mb-0 small">Cancelled</p>
-            </div>
-        </div>
-        <div class="col-md-2 animate-up" style="animation-delay: 0.6s;">
+        <div class="col-md-3 animate-up" style="animation-delay: 0.4s;">
             <div class="stat-card p-3 text-center">
                 <div class="mb-2">
                     <i class="fas fa-user-slash fa-2x" style="color: #dc3545;"></i>
                 </div>
                 <h4 class="fw-bold mb-1" style="color: #dc3545;">{{ no_show_month }}</h4>
-                <p class="text-secondary mb-0 small">No-Show</p>
+                <p class="text-secondary mb-0 small">No-Shows</p>
             </div>
         </div>
     </div>

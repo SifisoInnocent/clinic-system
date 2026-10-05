@@ -25,45 +25,60 @@
                     </a>
                 </div>
                 {% else %}
+                <!-- Step Indicator -->
+                <div class="d-flex justify-content-between mb-4 position-relative">
+                    <div class="progress position-absolute" style="top: 50%; left: 0; right: 0; transform: translateY(-50%); height: 3px; z-index: 1;">
+                        <div class="progress-bar bg-primary" id="progressBar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="text-center position-relative" style="z-index: 2;">
+                        <button type="button" class="btn btn-primary rounded-circle step-btn" style="width: 40px; height: 40px;" data-step="1">1</button>
+                        <div class="mt-2 small fw-bold">Provider</div>
+                    </div>
+                    <div class="text-center position-relative" style="z-index: 2;">
+                        <button type="button" class="btn btn-secondary rounded-circle step-btn" style="width: 40px; height: 40px;" data-step="2">2</button>
+                        <div class="mt-2 small text-muted">Date & Time</div>
+                    </div>
+                    <div class="text-center position-relative" style="z-index: 2;">
+                        <button type="button" class="btn btn-secondary rounded-circle step-btn" style="width: 40px; height: 40px;" data-step="3">3</button>
+                        <div class="mt-2 small text-muted">Reason</div>
+                    </div>
+                    <div class="text-center position-relative" style="z-index: 2;">
+                        <button type="button" class="btn btn-secondary rounded-circle step-btn" style="width: 40px; height: 40px;" data-step="4">4</button>
+                        <div class="mt-2 small text-muted">Confirm</div>
+                    </div>
+                </div>
+
                 <form method="post" id="appointmentForm">
                     {% csrf_token %}
                     
-                    <!-- Step 1: Provider Type -->
+                    <!-- Step 1: Provider -->
                     <div class="step-section" id="step1">
                         <h5 class="mb-3">
                             <i class="fas fa-user-md me-2"></i>
-                            Step 1: Select Provider Type
+                            Select Provider
                         </h5>
                         <div class="form-group mb-4">
                             <label class="form-label">Provider Type</label>
-                            <select class="form-control" name="provider_type" id="id_provider_type" required>
+                            <select class="form-select" name="provider_type" id="id_provider_type" required>
                                 <option value="">Select Provider Type</option>
                                 <option value="nurse">Nurse</option>
                                 <option value="psychologist">Psychologist</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <!-- Step 2: Staff Selection -->
-                    <div class="step-section" id="step2" style="display: none;">
-                        <h5 class="mb-3">
-                            <i class="fas fa-user me-2"></i>
-                            Step 2: Select Provider
-                        </h5>
                         <div class="form-group mb-4">
                             <label class="form-label">Provider</label>
-                            <select class="form-control" name="staff" id="id_staff" required>
-                                <option value="">Select Provider</option>
-                                <!-- Staff options will be loaded dynamically -->
+                            <select class="form-select" name="staff" id="id_staff" required disabled>
+                                <option value="">First select provider type</option>
                             </select>
                         </div>
                     </div>
                     
-                    <!-- Step 3: Date Selection -->
-                    <div class="step-section" id="step3" style="display: none;">
+                    <!-- Step 2: Date & Time -->
+                    <div class="step-section" id="step2" style="display: none;">
                         <h5 class="mb-3">
-                            <i class="fas fa-calendar me-2"></i>
-                            Step 3: Select Date
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Select Date & Time
                         </h5>
                         <div class="form-group mb-4">
                             <label class="form-label">Appointment Date</label>
@@ -72,50 +87,34 @@
                                 Select a date from the calendar. Appointments are only available on weekdays.
                             </small>
                         </div>
-                    </div>
-                    
-                    <!-- Step 4: Time Selection -->
-                    <div class="step-section" id="step4" style="display: none;">
-                        <h5 class="mb-3">
-                            <i class="fas fa-clock me-2"></i>
-                            Step 4: Select Time
-                        </h5>
                         <div class="form-group mb-4">
                             <label class="form-label">Appointment Time</label>
-                            <select class="form-control" name="appointment_time" id="id_appointment_time" required>
+                            <select class="form-select" name="appointment_time" id="id_appointment_time" required>
                                 <option value="">Select Time</option>
-                                <!-- Time slots will be loaded dynamically -->
                             </select>
-                            <div id="availableSlots" class="mt-3">
-                                <!-- Available slots will be loaded here via AJAX -->
-                            </div>
                         </div>
                     </div>
                     
-                    <!-- Step 5: Reason -->
-                    <div class="step-section" id="step5" style="display: none;">
+                    <!-- Step 3: Reason -->
+                    <div class="step-section" id="step3" style="display: none;">
                         <h5 class="mb-3">
                             <i class="fas fa-comment-medical me-2"></i>
-                            Step 5: Appointment Reason
+                            Appointment Reason
                         </h5>
                         <div class="form-group mb-4">
-                            <label class="form-label">Appointment Reason</label>
-                            <textarea class="form-control" name="reason" id="id_reason" rows="4" required placeholder="Please provide a brief description of the reason for your appointment."></textarea>
-                            <small class="form-text text-muted">
-                                Please provide a brief description of the reason for your appointment.
-                            </small>
+                            <label class="form-label">Reason</label>
+                            <textarea class="form-control" name="reason" id="id_reason" rows="4" required placeholder="Please provide a brief description..."></textarea>
                         </div>
                     </div>
                     
-                    <!-- Step 6: Confirmation -->
-                    <div class="step-section" id="step6" style="display: none;">
+                    <!-- Step 4: Confirmation -->
+                    <div class="step-section" id="step4" style="display: none;">
                         <h5 class="mb-3">
                             <i class="fas fa-check-circle me-2"></i>
-                            Step 6: Confirm Appointment
+                            Confirm Appointment
                         </h5>
-                        <div class="alert alert-info">
-                            <h6>Appointment Summary:</h6>
-                            <div id="appointmentSummary">
+                        <div class="card bg-light mb-4">
+                            <div class="card-body" id="appointmentSummary">
                                 <!-- Summary will be populated here -->
                             </div>
                         </div>
@@ -129,7 +128,7 @@
                     
                     <!-- Navigation Buttons -->
                     <div class="d-flex justify-content-between mt-4">
-                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary" id="prevBtn" style="display: none;">
                             <i class="fas fa-arrow-left me-2"></i> Previous
                         </button>
                         <button type="button" class="btn btn-primary" id="nextBtn">
@@ -149,18 +148,34 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let currentStep = 1;
-    const totalSteps = 6;
+    const totalSteps = 4;
     const form = document.getElementById('appointmentForm');
     const nextBtn = document.getElementById('nextBtn');
     const prevBtn = document.getElementById('prevBtn');
     const submitBtn = document.getElementById('submitBtn');
     
-    // Check if all elements exist
-    if (!form || !nextBtn || !prevBtn || !submitBtn) {
-        console.error('Missing form elements');
-        return;
-    }
+    // Check if elements exist
+    if (!form || !nextBtn || !prevBtn || !submitBtn) return;
     
+    function updateStepIndicator(step) {
+        document.querySelectorAll('.step-btn').forEach((btn, index) => {
+            if (index + 1 < step) {
+                btn.className = 'btn btn-success rounded-circle step-btn text-white';
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.nextElementSibling.className = 'mt-2 small fw-bold text-success';
+            } else if (index + 1 === step) {
+                btn.className = 'btn btn-primary rounded-circle step-btn text-white';
+                btn.innerHTML = step;
+                btn.nextElementSibling.className = 'mt-2 small fw-bold text-primary';
+            } else {
+                btn.className = 'btn btn-secondary rounded-circle step-btn text-white';
+                btn.innerHTML = index + 1;
+                btn.nextElementSibling.className = 'mt-2 small text-muted';
+            }
+        });
+        document.getElementById('progressBar').style.width = `${(step / totalSteps) * 100}%`;
+    }
+
     function showStep(step) {
         // Hide all steps
         for (let i = 1; i <= totalSteps; i++) {
@@ -174,71 +189,59 @@ document.addEventListener('DOMContentLoaded', function() {
         nextBtn.style.display = step < totalSteps ? 'inline-block' : 'none';
         submitBtn.style.display = step === totalSteps ? 'inline-block' : 'none';
         
-        // Update summary if on confirmation step
+        updateStepIndicator(step);
+
         if (step === totalSteps) {
             updateSummary();
         }
     }
     
     function validateStep(step) {
-        try {
-            if (step === 1) {
-                const providerType = document.getElementById('id_provider_type');
-                return providerType && providerType.value !== '';
-            } else if (step === 2) {
-                const staff = document.getElementById('id_staff');
-                return staff && staff.value !== '';
-            } else if (step === 3) {
-                const date = document.getElementById('id_appointment_date');
-                return date && date.value !== '';
-            } else if (step === 4) {
-                const time = document.getElementById('id_appointment_time');
-                return time && time.value !== '';
-            } else if (step === 5) {
-                const reason = document.getElementById('id_reason');
-                return reason && reason.value.trim() !== '';
-            }
-            return true;
-        } catch (error) {
-            console.error('Validation error:', error);
-            return false;
+        let isValid = true;
+        
+        if (step === 1) {
+            const providerType = document.getElementById('id_provider_type');
+            const staff = document.getElementById('id_staff');
+            if (!providerType.value) { providerType.classList.add('is-invalid'); isValid = false; }
+            else { providerType.classList.remove('is-invalid'); }
+            if (!staff.value) { staff.classList.add('is-invalid'); isValid = false; }
+            else { staff.classList.remove('is-invalid'); }
+        } else if (step === 2) {
+            const date = document.getElementById('id_appointment_date');
+            const time = document.getElementById('id_appointment_time');
+            if (!date.value) { date.classList.add('is-invalid'); isValid = false; }
+            else { date.classList.remove('is-invalid'); }
+            if (!time.value) { time.classList.add('is-invalid'); isValid = false; }
+            else { time.classList.remove('is-invalid'); }
+        } else if (step === 3) {
+            const reason = document.getElementById('id_reason');
+            if (!reason.value.trim()) { reason.classList.add('is-invalid'); isValid = false; }
+            else { reason.classList.remove('is-invalid'); }
         }
+        return isValid;
     }
     
     function updateSummary() {
-        try {
-            const providerType = document.getElementById('id_provider_type');
-            const staff = document.getElementById('id_staff');
-            const date = document.getElementById('id_appointment_date');
-            const time = document.getElementById('id_appointment_time');
-            const reason = document.getElementById('id_reason');
-            
-            if (!providerType || !staff || !date || !time || !reason) {
-                console.error('Missing summary elements');
-                return;
-            }
-            
-            const providerTypeText = providerType.options[providerType.selectedIndex]?.text || 'Not selected';
-            const staffText = staff.options[staff.selectedIndex]?.text || 'Not selected';
-            
-            const summary = `
-                <p><strong>Provider Type:</strong> ${providerTypeText}</p>
-                <p><strong>Provider:</strong> ${staffText}</p>
-                <p><strong>Date:</strong> ${date.value || 'Not selected'}</p>
-                <p><strong>Time:</strong> ${time.options[time.selectedIndex]?.text || time.value || 'Not selected'}</p>
-                <p><strong>Reason:</strong> ${reason.value || 'Not provided'}</p>
-            `;
-            
-            const summaryElement = document.getElementById('appointmentSummary');
-            if (summaryElement) {
-                summaryElement.innerHTML = summary;
-            }
-        } catch (error) {
-            console.error('Summary update error:', error);
-        }
+        const providerType = document.getElementById('id_provider_type');
+        const staff = document.getElementById('id_staff');
+        const date = document.getElementById('id_appointment_date');
+        const time = document.getElementById('id_appointment_time');
+        const reason = document.getElementById('id_reason');
+        
+        const ptText = providerType.options[providerType.selectedIndex]?.text || 'Not selected';
+        const staffText = staff.options[staff.selectedIndex]?.text || 'Not selected';
+        
+        const summary = `
+            <div class="row mb-2"><div class="col-sm-4 fw-bold">Provider Type:</div><div class="col-sm-8">${ptText}</div></div>
+            <div class="row mb-2"><div class="col-sm-4 fw-bold">Provider:</div><div class="col-sm-8">${staffText}</div></div>
+            <div class="row mb-2"><div class="col-sm-4 fw-bold">Date:</div><div class="col-sm-8">${date.value}</div></div>
+            <div class="row mb-2"><div class="col-sm-4 fw-bold">Time:</div><div class="col-sm-8">${time.options[time.selectedIndex]?.text || time.value}</div></div>
+            <div class="row mb-2"><div class="col-sm-4 fw-bold">Reason:</div><div class="col-sm-8">${reason.value}</div></div>
+        `;
+        
+        document.getElementById('appointmentSummary').innerHTML = summary;
     }
     
-    // Load staff when provider type changes
     const providerTypeElement = document.getElementById('id_provider_type');
     if (providerTypeElement) {
         providerTypeElement.addEventListener('change', function() {
@@ -246,130 +249,81 @@ document.addEventListener('DOMContentLoaded', function() {
             const staffSelect = document.getElementById('id_staff');
             
             if (providerType && staffSelect) {
-                // Load staff options based on provider type
-                loadStaffOptions(providerType);
-                staffSelect.disabled = false;
-            }
-        });
-    }
-    
-    // Function to load staff options
-    function loadStaffOptions(providerType) {
-        const staffSelect = document.getElementById('id_staff');
-        if (!staffSelect) return;
-        
-        // Clear existing options
-        staffSelect.innerHTML = '<option value="">Loading...</option>';
-        
-        // Load staff from database
-        console.log('Loading staff for provider type:', providerType);
-        
-        fetch(`/appointments/api/staff-by-type/?provider_type=${providerType}`, {
-            method: 'GET'
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Staff data received:', data);
-            staffSelect.innerHTML = '<option value="">Select Provider</option>';
-            
-            if (data.staff && data.staff.length > 0) {
-                console.log('Found staff:', data.staff.length);
-                data.staff.forEach(staff => {
-                    staffSelect.innerHTML += `<option value="${staff.id}">${staff.name}</option>`;
+                staffSelect.innerHTML = '<option value="">Loading...</option>';
+                staffSelect.disabled = true;
+                
+                fetch(`/appointments/api/staff-by-type/?provider_type=${providerType}`)
+                .then(r => r.json())
+                .then(data => {
+                    staffSelect.innerHTML = '<option value="">Select Provider</option>';
+                    if (data.staff && data.staff.length > 0) {
+                        data.staff.forEach(s => {
+                            staffSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                        });
+                        staffSelect.disabled = false;
+                    } else {
+                        staffSelect.innerHTML += '<option value="">No staff available</option>';
+                    }
+                }).catch(() => {
+                    staffSelect.innerHTML = '<option value="">Error loading staff</option>';
                 });
             } else {
-                console.log('No staff found');
-                staffSelect.innerHTML += '<option value="">No staff available</option>';
+                staffSelect.innerHTML = '<option value="">First select provider type</option>';
+                staffSelect.disabled = true;
             }
-        })
-        .catch(error => {
-            console.error('Error loading staff:', error);
-            staffSelect.innerHTML = '<option value="">Error loading staff</option>';
         });
     }
     
-    // Load available slots when date and staff are selected
     function loadAvailableSlots() {
         const staffId = document.getElementById('id_staff').value;
         const date = document.getElementById('id_appointment_date').value;
         const timeSelect = document.getElementById('id_appointment_time');
         
-        if (!staffId || !date || !timeSelect) return;
+        if (!staffId || !date) return;
         
-        // Clear existing time options
         timeSelect.innerHTML = '<option value="">Loading...</option>';
+        timeSelect.disabled = true;
         
         fetch(`/appointments/api/available-slots/?staff_id=${staffId}&date=${date}`)
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
                 timeSelect.innerHTML = '<option value="">Select Time</option>';
-                
                 if (data.slots && data.slots.length > 0) {
                     data.slots.forEach(slot => {
                         timeSelect.innerHTML += `<option value="${slot.time}">${slot.display}</option>`;
                     });
+                    timeSelect.disabled = false;
                 } else {
                     timeSelect.innerHTML += '<option value="">No available slots</option>';
                 }
-            })
-            .catch(error => {
-                console.error('Error loading slots:', error);
+            }).catch(() => {
                 timeSelect.innerHTML = '<option value="">Error loading slots</option>';
             });
     }
     
-    // Event listeners for date and staff changes
     const staffElement = document.getElementById('id_staff');
     const dateElement = document.getElementById('id_appointment_date');
     
-    if (staffElement) {
-        staffElement.addEventListener('change', loadAvailableSlots);
-    }
-    if (dateElement) {
-        dateElement.addEventListener('change', loadAvailableSlots);
-    }
+    if (staffElement) staffElement.addEventListener('change', loadAvailableSlots);
+    if (dateElement) dateElement.addEventListener('change', loadAvailableSlots);
     
-    // Navigation button handlers
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
-            if (validateStep(currentStep)) {
-                if (currentStep < totalSteps) {
-                    currentStep++;
-                    showStep(currentStep);
-                }
-            } else {
-                alert('Please complete the current step before proceeding.');
-            }
-        });
-    }
-    
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function() {
-            if (currentStep > 1) {
-                currentStep--;
+    nextBtn.addEventListener('click', function() {
+        if (validateStep(currentStep)) {
+            if (currentStep < totalSteps) {
+                currentStep++;
                 showStep(currentStep);
             }
-        });
-    }
-    
-    // Initialize
-    showStep(1);
-});
-
-function selectTimeSlot(time, display) {
-    document.getElementById('id_appointment_time').value = time;
-    
-    // Update button states
-    document.querySelectorAll('.slot-btn').forEach(btn => {
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn-outline-primary');
+        }
     });
     
-    event.target.classList.remove('btn-outline-primary');
-    event.target.classList.add('btn-primary');
-}
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+    
+    showStep(1);
+});
 </script>
 {% endblock %}
