@@ -18,38 +18,44 @@ class Migration(migrations.Migration):
             name='session_notes',
             field=models.TextField(blank=True, help_text='Confidential notes for psychologists'),
         ),
-        migrations.CreateModel(
-            name='FollowUpTask',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('completed', 'Completed')], default='pending', max_length=20)),
-                ('due_date', models.DateField()),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('appointment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follow_up_tasks', to='appointments.appointment')),
-                ('assigned_to', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assigned_follow_ups', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'follow_up_tasks',
-                'ordering': ['-due_date'],
-            },
+        # Only create FollowUpTask table if it doesn't exist
+        migrations.RunSQL(
+            sql="""
+                CREATE TABLE IF NOT EXISTS follow_up_tasks (
+                    id SERIAL PRIMARY KEY,
+                    appointment_id INTEGER NOT NULL,
+                    assigned_to_id INTEGER NOT NULL,
+                    status VARCHAR(20) DEFAULT 'pending',
+                    due_date DATE NOT NULL,
+                    notes TEXT,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id),
+                    FOREIGN KEY (assigned_to_id) REFERENCES auth_user(id)
+                )
+            """,
+            reverse_sql="""
+                DROP TABLE IF EXISTS follow_up_tasks
+            """
         ),
-        migrations.CreateModel(
-            name='AppointmentHistory',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(max_length=50)),
-                ('old_status', models.CharField(blank=True, max_length=20, null=True)),
-                ('new_status', models.CharField(blank=True, max_length=20, null=True)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('notes', models.TextField(blank=True)),
-                ('appointment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='history', to='appointments.appointment')),
-                ('changed_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'appointment_history',
-                'ordering': ['-timestamp'],
-            },
+        # Only create AppointmentHistory table if it doesn't exist
+        migrations.RunSQL(
+            sql="""
+                CREATE TABLE IF NOT EXISTS appointment_history (
+                    id SERIAL PRIMARY KEY,
+                    appointment_id INTEGER NOT NULL,
+                    action VARCHAR(50),
+                    old_status VARCHAR(20),
+                    new_status VARCHAR(20),
+                    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+                    notes TEXT,
+                    changed_by_id INTEGER,
+                    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id),
+                    FOREIGN KEY (changed_by_id) REFERENCES auth_user(id)
+                )
+            """,
+            reverse_sql="""
+                DROP TABLE IF EXISTS appointment_history
+            """
         ),
     ]

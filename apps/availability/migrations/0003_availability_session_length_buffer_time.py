@@ -1,6 +1,6 @@
 # Generated manually for session length and buffer time
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
@@ -10,14 +10,24 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='availability',
-            name='session_length',
-            field=models.IntegerField(default=60, help_text='Session length in minutes'),
+        # Add session_length column if it doesn't exist
+        migrations.RunSQL(
+            sql="""
+                ALTER TABLE availability
+                ADD COLUMN IF NOT EXISTS session_length INTEGER DEFAULT 60
+            """,
+            reverse_sql="""
+                ALTER TABLE availability DROP COLUMN IF EXISTS session_length
+            """
         ),
-        migrations.AddField(
-            model_name='availability',
-            name='buffer_time',
-            field=models.IntegerField(default=15, help_text='Buffer time between sessions in minutes'),
+        # Add buffer_time column if it doesn't exist
+        migrations.RunSQL(
+            sql="""
+                ALTER TABLE availability
+                ADD COLUMN IF NOT EXISTS buffer_time INTEGER DEFAULT 15
+            """,
+            reverse_sql="""
+                ALTER TABLE availability DROP COLUMN IF EXISTS buffer_time
+            """
         ),
     ]
