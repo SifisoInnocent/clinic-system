@@ -23,6 +23,8 @@ class Availability(models.Model):
     day_of_week = models.IntegerField(choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
+    session_length = models.IntegerField(default=60, help_text="Session length in minutes")
+    buffer_time = models.IntegerField(default=15, help_text="Buffer time between sessions in minutes")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -10,15 +10,13 @@ User = get_user_model()
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=False)
-    role = forms.CharField(max_length=20, required=False)  # Made optional
     student_number = forms.CharField(max_length=20, required=False)
-    employee_id = forms.CharField(max_length=20, required=False)
     phone_number = forms.CharField(max_length=20, required=False)
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'role', 
-                 'student_number', 'employee_id', 'phone_number', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name', 
+                 'student_number', 'phone_number', 'password1', 'password2')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,20 +24,10 @@ class CustomUserCreationForm(UserCreationForm):
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['first_name'].widget.attrs.update({'class': 'form-control'})
         self.fields['last_name'].widget.attrs.update({'class': 'form-control'})
-        self.fields['role'].widget.attrs.update({'class': 'form-control'})
         self.fields['student_number'].widget.attrs.update({'class': 'form-control'})
-        self.fields['employee_id'].widget.attrs.update({'class': 'form-control'})
         self.fields['phone_number'].widget.attrs.update({'class': 'form-control'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
-    
-    def clean_role(self):
-        role = self.cleaned_data.get('role')
-        valid_roles = ['student', 'nurse', 'psychologist', 'admin']
-        if role not in valid_roles:
-            # Default to student if invalid role provided
-            return 'student'
-        return role
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -50,11 +38,6 @@ class CustomUserCreationForm(UserCreationForm):
         student_number = self.cleaned_data.get('student_number')
         # Allow duplicate student numbers for easier registration
         return student_number if student_number else None
-    
-    def clean_employee_id(self):
-        employee_id = self.cleaned_data.get('employee_id')
-        # Allow duplicate employee IDs for easier registration
-        return employee_id if employee_id else None
 
 
 class CustomAuthenticationForm(forms.Form):

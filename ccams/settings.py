@@ -72,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.analytics.middleware.AnalyticsMiddleware',
+    'apps.audit.middleware.PatientDataAccessAuditMiddleware',
 ]
 
 ROOT_URLCONF = 'ccams.urls'

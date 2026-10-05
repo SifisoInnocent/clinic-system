@@ -290,9 +290,8 @@ def register_view(request):
                     user.email = request.POST.get('email', user.email or '')
                     user.first_name = request.POST.get('first_name', user.first_name or '')
                     user.last_name = request.POST.get('last_name', user.last_name or '')
-                    user.role = request.POST.get('role', user.role or 'student')
+                    user.role = 'student'
                     user.student_number = student_num if student_num else user.student_number
-                    user.employee_id = emp_id if emp_id else user.employee_id
                     user.phone_number = request.POST.get('phone_number', user.phone_number or '')
                     user.is_active = True
                     user.save()
@@ -304,9 +303,8 @@ def register_view(request):
                         email=request.POST.get('email', ''),
                         first_name=request.POST.get('first_name', ''),
                         last_name=request.POST.get('last_name', ''),
-                        role=request.POST.get('role', 'student'),
+                        role='student',
                         student_number=student_num,
-                        employee_id=emp_id,
                         phone_number=request.POST.get('phone_number', '')
                     )
                 
@@ -328,7 +326,7 @@ def register_view(request):
                     user = User.objects.create_user(
                         username=username,
                         password=password,
-                        role=request.POST.get('role', 'student')
+                        role='student'
                     )
                     messages.success(request, 'Account created successfully! You can now log in.')
                     return redirect('/accounts/login/')

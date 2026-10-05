@@ -30,6 +30,7 @@ class AuditLog(models.Model):
         ('generate_report', 'Generate Report'),
         ('export_data', 'Export Data'),
         ('system_config', 'System Configuration'),
+        ('access_patient_record', 'Access Patient Record'),
     ]
     
     admin = models.ForeignKey(
