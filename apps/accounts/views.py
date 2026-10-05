@@ -48,7 +48,12 @@ def login_view(request):
                 messages.error(request, 'Your account is locked. Please try again later.')
                 form.add_error(None, 'Your account is locked. Please try again later.')
             elif user and user.can_login():
-                authenticated_user = authenticate(request, username=user.username, password=password)
+                # For admin, bypass custom logic and use standard authenticate
+                if user.username == 'admin':
+                    authenticated_user = authenticate(request, username=username, password=password)
+                else:
+                    authenticated_user = authenticate(request, username=user.username, password=password)
+                
                 if authenticated_user:
                     login(request, authenticated_user)
                     authenticated_user.reset_failed_login()

@@ -18,17 +18,27 @@ class Command(BaseCommand):
                 'role': 'admin',
                 'employee_id': 'ADMIN001',
                 'is_staff': True,
-                'is_superuser': True
+                'is_superuser': True,
+                'is_active': True
             }
         )
+        
+        # Reset password
         admin.set_password('admin123')
+        
+        # Unlock account and reset failed attempts
+        admin.is_locked = False
+        admin.failed_login_attempts = 0
+        admin.locked_until = None
+        admin.is_active = True
         admin.save()
         
         if created:
             UserProfile.objects.get_or_create(user=admin)
             self.stdout.write(self.style.SUCCESS('Admin user created'))
         else:
-            self.stdout.write(self.style.SUCCESS('Admin password reset'))
+            self.stdout.write(self.style.SUCCESS('Admin password reset and unlocked'))
         
         self.stdout.write('Username: admin')
         self.stdout.write('Password: admin123')
+        self.stdout.write(self.style.SUCCESS('Account is now unlocked and active'))
