@@ -29,32 +29,23 @@ def login_view(request):
             username = form.cleaned_data.get('username', '').strip()
             password = form.cleaned_data.get('password', '')
             
-            # Try to find user by username or student number
-            try:
-                user = User.objects.get(
-                    Q(username__iexact=username) | Q(student_number__iexact=username)
-                )
-            except User.DoesNotExist:
-                user = None
+            # Use standard Django authentication
+            authenticated_user = authenticate(request, username=username, password=password)
             
-            if user and not user.can_login():
-                AuditLog.log_action(
-                    admin=user,
-                    action='failed_login',
-                    description=f"Failed login attempt for {user.username}: Account locked",
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
-                )
-                messages.error(request, 'Your account is locked. Please try again later.')
-                form.add_error(None, 'Your account is locked. Please try again later.')
-            elif user and user.can_login():
-                # For admin, bypass custom logic and use standard authenticate
-                if user.username == 'admin':
-                    authenticated_user = authenticate(request, username=username, password=password)
+            if authenticated_user:
+                # Check if account is locked
+                if not authenticated_user.can_login():
+                    AuditLog.log_action(
+                        admin=authenticated_user,
+                        action='failed_login',
+                        description=f"Failed login attempt for {authenticated_user.username}: Account locked",
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                    messages.error(request, 'Your account is locked. Please try again later.')
+                    form.add_error(None, 'Your account is locked. Please try again later.')
                 else:
-                    authenticated_user = authenticate(request, username=user.username, password=password)
-                
-                if authenticated_user:
+                    # Login successful
                     login(request, authenticated_user)
                     authenticated_user.reset_failed_login()
                     
@@ -69,7 +60,12 @@ def login_view(request):
                     
                     messages.success(request, f'Welcome back, {authenticated_user.get_full_name()}!')
                     return redirect('/dashboard/')
-                else:
+            else:
+                # Try to find user for logging failed attempt
+                try:
+                    user = User.objects.get(
+                        Q(username__iexact=username) | Q(student_number__iexact=username)
+                    )
                     # Invalid password
                     user.increment_failed_login()
                     AuditLog.log_action(
@@ -79,17 +75,16 @@ def login_view(request):
                         ip_address=get_client_ip(request),
                         user_agent=request.META.get('HTTP_USER_AGENT', '')
                     )
-                    messages.error(request, 'Invalid username or password.')
-                    form.add_error(None, 'Invalid username or password.')
-            else:
-                # User not found
-                AuditLog.log_action(
-                    admin=None,
-                    action='failed_login',
-                    description=f"Failed login attempt for unknown username: {username}",
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
-                )
+                except User.DoesNotExist:
+                    # User not found
+                    AuditLog.log_action(
+                        admin=None,
+                        action='failed_login',
+                        description=f"Failed login attempt for unknown username: {username}",
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                
                 messages.error(request, 'Invalid username or password.')
                 form.add_error(None, 'Invalid username or password.')
     else:
