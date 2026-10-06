@@ -87,6 +87,10 @@ class UserCreateForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+    
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'role', 
@@ -114,6 +118,13 @@ class UserCreateForm(forms.ModelForm):
         role = cleaned_data.get('role')
         student_number = cleaned_data.get('student_number')
         employee_id = cleaned_data.get('employee_id')
+        
+        # SECURITY: Only admins can create staff accounts
+        if role in ['nurse', 'psychologist', 'admin']:
+            if not self.request or not self.request.user.is_authenticated:
+                raise ValidationError('Only authenticated admins can create staff accounts')
+            if not self.request.user.is_admin():
+                raise ValidationError('Only administrators can create staff accounts (nurse, psychologist, admin)')
         
         if role == 'student' and not student_number:
             raise ValidationError('Student number is required for student role')
@@ -148,6 +159,11 @@ class UserCreateForm(forms.ModelForm):
 
 
 class UserEditForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        self.instance = kwargs.get('instance', None)
+        super().__init__(*args, **kwargs)
+    
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'role', 
@@ -169,6 +185,13 @@ class UserEditForm(forms.ModelForm):
         role = cleaned_data.get('role')
         student_number = cleaned_data.get('student_number')
         employee_id = cleaned_data.get('employee_id')
+        
+        # SECURITY: Only admins can change role to staff
+        if role and role in ['nurse', 'psychologist', 'admin']:
+            if not self.request or not self.request.user.is_authenticated:
+                raise ValidationError('Only authenticated admins can assign staff roles')
+            if not self.request.user.is_admin():
+                raise ValidationError('Only administrators can assign staff roles (nurse, psychologist, admin)')
         
         if role == 'student' and not student_number:
             raise ValidationError('Student number is required for student role')

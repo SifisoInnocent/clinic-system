@@ -177,7 +177,7 @@ def user_list_view(request):
 def user_create_view(request):
     """Create new user (admin only)"""
     if request.method == 'POST':
-        form = UserCreateForm(request.POST)
+        form = UserCreateForm(request.POST, request=request)
         if form.is_valid():
             user = form.save()
             
@@ -197,7 +197,7 @@ def user_create_view(request):
             messages.success(request, f'User {user.username} has been created successfully!')
             return redirect('accounts:user_list')
     else:
-        form = UserCreateForm()
+        form = UserCreateForm(request=request)
     
     return render(request, 'accounts/user_create.html', {'form': form})
 
@@ -208,7 +208,7 @@ def user_edit_view(request, user_id):
     user = get_object_or_404(User, id=user_id)
     
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=user)
+        form = UserEditForm(request.POST, instance=user, request=request)
         if form.is_valid():
             old_role = user.role
             old_active = user.is_active
@@ -234,7 +234,7 @@ def user_edit_view(request, user_id):
             messages.success(request, f'User {user.username} has been updated successfully!')
             return redirect('accounts:user_list')
     else:
-        form = UserEditForm(instance=user)
+        form = UserEditForm(instance=user, request=request)
     
     return render(request, 'accounts/user_edit.html', {'form': form, 'target_user': user})
 
