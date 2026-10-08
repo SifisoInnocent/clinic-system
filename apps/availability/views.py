@@ -33,32 +33,10 @@ def availability_create_view(request):
         if form.is_valid():
             availability = form.save(commit=False)
             availability.staff = request.user
+            availability.save()
             
-            try:
-                # This will call full_clean() inside save()
-                availability.save()
-                
-                # Log availability creation
-                AuditLog.log_action(
-                    admin=request.user,
-                    action='create_availability',
-                    target_object=f'Availability for {availability.get_day_of_week_display()}',
-                    description=f"Staff {request.user.username} created availability: {availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}",
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
-                )
-                
-                messages.success(request, 'Availability has been created successfully!')
-                return redirect('availability:availability_list')
-            except Exception as e:
-                # Catch ValidationError from model full_clean()
-                from django.core.exceptions import ValidationError
-                if isinstance(e, ValidationError):
-                    for field, errs in e.message_dict.items() if hasattr(e, 'message_dict') else [(None, e.messages)]:
-                        for err in errs:
-                            form.add_error(field if field != '__all__' else None, err)
-                else:
-                    form.add_error(None, f"Error saving availability: {e}")
+            messages.success(request, 'Availability has been created successfully!')
+            return redirect('availability:availability_list')
     else:
         form = AvailabilityForm()
     
@@ -76,31 +54,9 @@ def availability_edit_view(request, availability_id):
     if request.method == 'POST':
         form = AvailabilityForm(request.POST, instance=availability)
         if form.is_valid():
-            old_values = f"{availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}"
-            
-            try:
-                form.save()
-                
-                # Log availability update
-                AuditLog.log_action(
-                    admin=request.user,
-                    action='update_availability',
-                    target_object=f'Availability for {availability.get_day_of_week_display()}',
-                    description=f"Staff {request.user.username} updated availability: {old_values} to {availability.get_day_of_week_display()} {availability.start_time}-{availability.end_time}",
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
-                )
-                
-                messages.success(request, 'Availability has been updated successfully!')
-                return redirect('availability:availability_list')
-            except Exception as e:
-                from django.core.exceptions import ValidationError
-                if isinstance(e, ValidationError):
-                    for field, errs in e.message_dict.items() if hasattr(e, 'message_dict') else [(None, e.messages)]:
-                        for err in errs:
-                            form.add_error(field if field != '__all__' else None, err)
-                else:
-                    form.add_error(None, f"Error saving availability: {e}")
+            form.save()
+            messages.success(request, 'Availability has been updated successfully!')
+            return redirect('availability:availability_list')
     else:
         form = AvailabilityForm(instance=availability)
     

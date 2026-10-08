@@ -14,14 +14,12 @@ def dashboard_view(request):
     """Main dashboard view - redirects based on role"""
     user = request.user
     
-    if user.is_student():
-        return student_dashboard_view(request)
-    elif user.is_nurse() or user.is_psychologist():
-        return staff_dashboard_view(request)
-    elif user.is_admin():
+    # Simple role-based redirect
+    if user.role == 'admin':
         return admin_dashboard_view(request)
-    else:
-        # Fallback to student dashboard
+    elif user.role in ['nurse', 'psychologist']:
+        return staff_dashboard_view(request)
+    else:  # student or fallback
         return student_dashboard_view(request)
 
 

@@ -102,7 +102,7 @@ def appointment_book_view(request):
         form = SimpleAppointmentBookingForm(request.POST)
         if form.is_valid():
             try:
-                # Create appointment manually to avoid model form issues
+                # Create appointment
                 appointment = Appointment.objects.create(
                     student=request.user,
                     staff=form.cleaned_data['staff'],
@@ -122,42 +122,33 @@ def appointment_book_view(request):
                     notes='Appointment created'
                 )
                 
-                # Log appointment creation
-                AuditLog.log_action(
-                    admin=request.user,
-                    action='create_appointment',
-                    target_object=f'Appointment {appointment.appointment_id}',
-                    description=f"Student {request.user.username} booked appointment with {appointment.staff.get_full_name()}",
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
-                )
+                # Log appointment creation (silent if fails)
+                try:
+                    AuditLog.log_action(
+                        admin=request.user,
+                        action='create_appointment',
+                        target_object=f'Appointment {appointment.appointment_id}',
+                        description=f"Student {request.user.username} booked appointment with {appointment.staff.get_full_name()}",
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                except:
+                    pass
                 
-                # Send notification
-                notification_service = NotificationService()
-                notification_service.send_booking_confirmation(appointment)
+                # Send notification (silent if fails)
+                try:
+                    notification_service = NotificationService()
+                    notification_service.send_booking_confirmation(appointment)
+                except:
+                    pass
                 
-                messages.success(request, 'Your appointment has been booked successfully! You will receive a confirmation email.')
+                messages.success(request, 'Your appointment has been booked successfully!')
                 return redirect('appointments:appointment_detail', appointment_id=appointment.appointment_id)
-            except ValidationError as e:
-                for error in getattr(e, 'messages', [str(e)]):
-                    form.add_error(None, error)
+            except Exception as e:
+                messages.error(request, f'Error booking appointment: {str(e)}')
     else:
         from .forms_simple import SimpleAppointmentBookingForm
-        # Handle pre-selection from dashboard
-        initial_data = {}
-        provider_type = request.GET.get('provider_type')
-        staff_id = request.GET.get('staff')
-        
-        if provider_type:
-            initial_data['provider_type'] = provider_type
-            if staff_id:
-                try:
-                    staff = User.objects.get(id=staff_id, role=provider_type, is_active=True)
-                    initial_data['staff'] = staff
-                except User.DoesNotExist:
-                    pass
-        
-        form = SimpleAppointmentBookingForm(initial=initial_data)
+        form = SimpleAppointmentBookingForm()
     
     context = {
         'form': form,

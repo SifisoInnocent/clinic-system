@@ -257,33 +257,21 @@ class Command(BaseCommand):
             psychologist = User.objects.get(username='psych01')
             
             # Create availability for staff (skip if already exists)
-            # Nurse availability (Monday-Friday 8AM-4PM)
-            for day in range(1, 6):  # Monday to Friday
-                try:
-                    Availability.objects.get_or_create(
-                        staff=nurse,
-                        day_of_week=day,
-                        start_time='08:00',
-                        end_time='16:00',
-                        defaults={'is_active': True, 'session_length': 60, 'buffer_time': 15}
-                    )
-                except Exception:
-                    pass  # Skip if already exists or has conflicts
+            # Default availability: Monday-Friday 8AM-5PM for all staff
+            for staff in [nurse, psychologist]:
+                for day in range(1, 6):  # Monday to Friday
+                    try:
+                        Availability.objects.get_or_create(
+                            staff=staff,
+                            day_of_week=day,
+                            start_time='08:00',
+                            end_time='17:00',
+                            defaults={'is_active': True, 'session_length': 60, 'buffer_time': 15}
+                        )
+                    except Exception:
+                        pass  # Skip if already exists or has conflicts
             
-            # Psychologist availability (Monday-Friday 9AM-5PM)
-            for day in range(1, 6):  # Monday to Friday
-                try:
-                    Availability.objects.get_or_create(
-                        staff=psychologist,
-                        day_of_week=day,
-                        start_time='09:00',
-                        end_time='17:00',
-                        defaults={'is_active': True, 'session_length': 60, 'buffer_time': 15}
-                    )
-                except Exception:
-                    pass  # Skip if already exists or has conflicts
-            
-            self.stdout.write(self.style.SUCCESS('Staff availability ready'))
+            self.stdout.write(self.style.SUCCESS('Staff availability ready (8AM-5PM Mon-Fri)'))
         except Exception as e:
             self.stdout.write(self.style.WARNING(f'Staff availability skipped: {e}'))
         

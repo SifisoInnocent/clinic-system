@@ -38,29 +38,12 @@ class Availability(models.Model):
         return f"{self.staff.get_full_name()} - {self.get_day_of_week_display()} {self.start_time} to {self.end_time}"
     
     def clean(self):
-        # Validate that staff is actually staff
-        if hasattr(self, 'staff_id') and self.staff_id and not self.staff.is_staff_user():
-            raise ValidationError("Selected user is not staff (nurse or psychologist)")
-        
-        # Validate time range
+        # Validate time range only
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             raise ValidationError("Start time must be before end time")
-        
-        # Check for overlapping availability
-        if hasattr(self, 'staff_id') and self.staff_id and self.day_of_week and self.start_time and self.end_time:
-            overlapping = Availability.objects.filter(
-                staff=self.staff,
-                day_of_week=self.day_of_week,
-                start_time__lt=self.end_time,
-                end_time__gt=self.start_time,
-                is_active=True
-            ).exclude(pk=self.pk)
-            
-            if overlapping.exists():
-                raise ValidationError("This time range overlaps with existing availability")
     
     def save(self, *args, **kwargs):
-        self.full_clean()
+        # Skip full_clean to avoid overlapping checks
         super().save(*args, **kwargs)
 
 

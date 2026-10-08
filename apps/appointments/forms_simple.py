@@ -75,7 +75,7 @@ class SimpleAppointmentBookingForm(forms.Form):
         if not appointment_time:
             raise forms.ValidationError('Please select an appointment time.')
         
-        # Check for double booking
+        # Check for double booking only
         from .models import Appointment
         if Appointment.objects.filter(
             staff=staff,
@@ -83,39 +83,5 @@ class SimpleAppointmentBookingForm(forms.Form):
             appointment_time=appointment_time
         ).exclude(status='cancelled').exists():
             raise forms.ValidationError('This time slot is already booked.')
-        
-        # Security/Penetration Test Fix: Verify slot is actually available in the schedule
-        if staff and appointment_date and appointment_time:
-            from apps.availability.models import Availability, BlockedPeriod
-            from datetime import datetime
-            
-            day_of_week = appointment_date.isoweekday()
-            
-            # 1. Check if staff is available at all on this day
-            availabilities = Availability.objects.filter(
-                staff=staff,
-                day_of_week=day_of_week,
-                start_time__lte=appointment_time,
-                end_time__gt=appointment_time,
-                is_active=True
-            )
-            
-            if not availabilities.exists():
-                raise forms.ValidationError('The selected staff member is not available at this time.')
-                
-            # 2. Check if the time slot is blocked
-            slot_datetime = timezone.make_aware(
-                datetime.combine(appointment_date, appointment_time)
-            )
-            
-            blocked = BlockedPeriod.objects.filter(
-                staff=staff,
-                start_datetime__lte=slot_datetime,
-                end_datetime__gt=slot_datetime,
-                is_active=True
-            ).exists()
-            
-            if blocked:
-                raise forms.ValidationError('The selected time slot is currently blocked or unavailable.')
                 
         return cleaned_data

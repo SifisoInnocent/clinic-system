@@ -24,32 +24,23 @@ def login_view(request):
         return redirect('/dashboard/')
     
     if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username', '').strip()
-            password = form.cleaned_data.get('password', '')
-            
-            # Use standard Django authentication
-            authenticated_user = authenticate(request, username=username, password=password)
-            
-            if authenticated_user:
-                # Check if account is locked
-                if not authenticated_user.can_login():
-                    AuditLog.log_action(
-                        admin=authenticated_user,
-                        action='failed_login',
-                        description=f"Failed login attempt for {authenticated_user.username}: Account locked",
-                        ip_address=get_client_ip(request),
-                        user_agent=request.META.get('HTTP_USER_AGENT', '')
-                    )
-                    messages.error(request, 'Your account is locked. Please try again later.')
-                    form.add_error(None, 'Your account is locked. Please try again later.')
-                else:
-                    # Login successful
-                    login(request, authenticated_user)
-                    authenticated_user.reset_failed_login()
-                    
-                    # Log successful login
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        
+        # Use standard Django authentication
+        authenticated_user = authenticate(request, username=username, password=password)
+        
+        if authenticated_user:
+            # Check if account is locked
+            if not authenticated_user.can_login():
+                messages.error(request, 'Your account is locked. Please try again later.')
+            else:
+                # Login successful
+                login(request, authenticated_user)
+                authenticated_user.reset_failed_login()
+                
+                # Log successful login
+                try:
                     AuditLog.log_action(
                         admin=authenticated_user,
                         action='login',
@@ -57,39 +48,15 @@ def login_view(request):
                         ip_address=get_client_ip(request),
                         user_agent=request.META.get('HTTP_USER_AGENT', '')
                     )
-                    
-                    messages.success(request, f'Welcome back, {authenticated_user.get_full_name()}!')
-                    return redirect('/dashboard/')
-            else:
-                # Try to find user for logging failed attempt
-                try:
-                    user = User.objects.get(
-                        Q(username__iexact=username) | Q(student_number__iexact=username)
-                    )
-                    # Invalid password
-                    user.increment_failed_login()
-                    AuditLog.log_action(
-                        admin=user,
-                        action='failed_login',
-                        description=f"Failed login attempt for {user.username}: Invalid password",
-                        ip_address=get_client_ip(request),
-                        user_agent=request.META.get('HTTP_USER_AGENT', '')
-                    )
-                except User.DoesNotExist:
-                    # User not found
-                    AuditLog.log_action(
-                        admin=None,
-                        action='failed_login',
-                        description=f"Failed login attempt for unknown username: {username}",
-                        ip_address=get_client_ip(request),
-                        user_agent=request.META.get('HTTP_USER_AGENT', '')
-                    )
+                except:
+                    pass  # Log silently if audit fails
                 
-                messages.error(request, 'Invalid username or password.')
-                form.add_error(None, 'Invalid username or password.')
-    else:
-        form = CustomAuthenticationForm()
+                messages.success(request, f'Welcome back, {authenticated_user.get_full_name()}!')
+                return redirect('/dashboard/')
+        else:
+            messages.error(request, 'Invalid username or password.')
     
+    form = CustomAuthenticationForm()
     return render(request, 'accounts/login_working.html', {'form': form})
 
 
