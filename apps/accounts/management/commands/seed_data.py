@@ -181,6 +181,26 @@ class Command(BaseCommand):
             UserProfile.objects.get_or_create(user=psychologist)
         self.stdout.write(self.style.SUCCESS('Psychologist user ready: psych01/psych123'))
         
+        # Set staff as active and ensure is_staff is True
+        nurse.is_active = True
+        nurse.is_staff = True
+        nurse.save()
+        
+        psychologist.is_active = True
+        psychologist.is_staff = True
+        psychologist.save()
+        
+        # Ensure staff can login
+        nurse.is_locked = False
+        nurse.failed_login_attempts = 0
+        nurse.locked_until = None
+        nurse.save()
+        
+        psychologist.is_locked = False
+        psychologist.failed_login_attempts = 0
+        psychologist.locked_until = None
+        psychologist.save()
+        
         # Create student users
         students_data = [
             {
