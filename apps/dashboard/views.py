@@ -16,10 +16,13 @@ def dashboard_view(request):
     
     if user.is_student():
         return student_dashboard_view(request)
-    elif user.is_staff_user():
+    elif user.is_nurse() or user.is_psychologist():
         return staff_dashboard_view(request)
-    else:  # admin
+    elif user.is_admin():
         return admin_dashboard_view(request)
+    else:
+        # Fallback to student dashboard
+        return student_dashboard_view(request)
 
 
 @student_required

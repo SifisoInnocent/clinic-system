@@ -36,15 +36,24 @@ class SimpleAppointmentBookingForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         # Filter staff based on provider type
+        provider_type = None
         if 'provider_type' in self.data:
             try:
                 provider_type = self.data.get('provider_type')
-                self.fields['staff'].queryset = User.objects.filter(
-                    role=provider_type, 
-                    is_active=True
-                ).order_by('first_name', 'last_name')
             except (ValueError, TypeError):
-                self.fields['staff'].queryset = User.objects.none()
+                pass
+        
+        if provider_type:
+            self.fields['staff'].queryset = User.objects.filter(
+                role=provider_type, 
+                is_active=True
+            ).order_by('first_name', 'last_name')
+        else:
+            # Show all active staff by default
+            self.fields['staff'].queryset = User.objects.filter(
+                role__in=['nurse', 'psychologist'],
+                is_active=True
+            ).order_by('first_name', 'last_name')
     
     def clean_appointment_date(self):
         appointment_date = self.cleaned_data.get('appointment_date')

@@ -176,6 +176,11 @@ def user_create_view(request):
         if form.is_valid():
             user = form.save()
             
+            # Set is_staff for staff roles
+            if user.role in ['nurse', 'psychologist', 'admin']:
+                user.is_staff = True
+                user.save()
+            
             # Create user profile
             UserProfile.objects.create(user=user)
             
