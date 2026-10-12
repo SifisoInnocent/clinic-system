@@ -412,16 +412,13 @@
                     <!-- Admin Access Button -->
                     <div class="text-center">
                         <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" onclick="
-                            var pwd = prompt('Enter Admin Password:');
-                            if(pwd === 'admin123') {
-                                document.getElementById('username').value = 'admin';
-                                document.getElementById('password').value = pwd;
-                                document.getElementById('loginForm').submit();
-                            } else if(pwd !== null) {
-                                alert('Incorrect password. Please try again.');
-                            }
+                            document.getElementById('username').value = 'admin';
+                            document.getElementById('password').focus();
+                            document.getElementById('password').placeholder = 'Enter admin password...';
+                            this.innerHTML = '<i class=\'fas fa-shield-alt me-2\'></i> Fill username → enter password above';
+                            this.disabled = true;
                         ">
-                            <i class="fas fa-shield-alt me-2"></i> Admin Dashboard Access
+                            <i class="fas fa-shield-alt me-2"></i> Admin Portal Access
                         </button>
                     </div>
                 </div>
