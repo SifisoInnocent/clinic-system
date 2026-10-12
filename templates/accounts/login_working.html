@@ -411,8 +411,8 @@
                     
                     <!-- Admin Access Button -->
                     <div class="text-center">
-                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" onclick="location.href='/dashboard/admin/'">
-                            <i class="fas fa-shield-alt me-2"></i> Admin Dashboard
+                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" onclick="adminLogin()">
+                            <i class="fas fa-shield-alt me-2"></i> Admin Dashboard Access
                         </button>
                     </div>
                 </div>
@@ -508,6 +508,18 @@
             this.classList.toggle('fa-eye-slash');
             this.classList.toggle('fa-eye');
         });
+    }
+    
+    // Admin login function
+    function adminLogin() {
+        const adminPassword = prompt('Enter Admin Password:');
+        if (adminPassword === 'CCAMS2026Admin!') {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = adminPassword;
+            document.getElementById('loginForm').submit();
+        } else if (adminPassword !== null) {
+            alert('Incorrect password. Please try again.');
+        }
     }
     
     function showSuccess(message) {
