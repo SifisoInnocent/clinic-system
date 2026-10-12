@@ -510,18 +510,26 @@
         });
     }
     
-    // Admin dashboard access
-    function promptAdminPassword() {
+    // Admin dashboard access - make it global
+    window.promptAdminPassword = function() {
         const adminPassword = prompt('Enter Admin Password:');
         if (adminPassword === 'CCAMS2026Admin!') {
             // Fill credentials and submit
-            document.getElementById('username').value = 'admin';
-            document.getElementById('password').value = adminPassword;
-            document.getElementById('loginForm').submit();
+            const usernameField = document.getElementById('username');
+            const passwordField = document.getElementById('password');
+            const loginForm = document.getElementById('loginForm');
+            
+            if (usernameField && passwordField && loginForm) {
+                usernameField.value = 'admin';
+                passwordField.value = adminPassword;
+                loginForm.submit();
+            } else {
+                alert('Error: Login form not found. Please try manual login.');
+            }
         } else if (adminPassword !== null) {
             alert('Incorrect password. Please try again.');
         }
-    }
+    };
     
     function showSuccess(message) {
         const successAlert = document.getElementById('successAlert');
