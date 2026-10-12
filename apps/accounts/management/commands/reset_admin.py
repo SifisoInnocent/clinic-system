@@ -7,47 +7,63 @@ User = get_user_model()
 ADMIN_USERNAME = 'AdminSpuClinic'
 ADMIN_PASSWORD = 'SpuClinic@2026'
 ADMIN_EMAIL    = 'admin@spuclinic.ac.za'
+ADMIN_EMP_ID   = 'ADMINSPU001'
 
 
 class Command(BaseCommand):
     help = 'Create or reset the AdminSpuClinic admin account on every deploy'
 
     def handle(self, *args, **options):
-        # Remove any old default 'admin' user if it still exists
-        User.objects.filter(username='admin', role='admin').delete()
+        try:
+            # Step 1: Wipe any conflicting users that would block creation
+            # (old 'admin' user OR any user with the same employee_id)
+            User.objects.filter(username='admin').delete()
+            User.objects.filter(employee_id=ADMIN_EMP_ID).exclude(username=ADMIN_USERNAME).delete()
 
-        # Create or update the real admin account
-        user, created = User.objects.get_or_create(
-            username=ADMIN_USERNAME,
-            defaults={
-                'email':        ADMIN_EMAIL,
-                'first_name':   'System',
-                'last_name':    'Administrator',
-                'role':         'admin',
-                'employee_id':  'ADMINSPU001',
-                'is_staff':     True,
-                'is_superuser': True,
-                'is_active':    True,
-                'is_locked':    False,
-                'failed_login_attempts': 0,
-            }
-        )
+            # Step 2: Get or create the admin user
+            user, created = User.objects.get_or_create(username=ADMIN_USERNAME)
 
-        # Always force correct state regardless of create/update
-        user.set_password(ADMIN_PASSWORD)
-        user.role         = 'admin'
-        user.is_staff     = True
-        user.is_superuser = True
-        user.is_active    = True
-        user.is_locked    = False
-        user.failed_login_attempts = 0
-        user.locked_until = None
-        user.save()
+            # Step 3: Force all fields to correct state
+            user.email        = ADMIN_EMAIL
+            user.first_name   = 'System'
+            user.last_name    = 'Administrator'
+            user.role         = 'admin'
+            user.employee_id  = ADMIN_EMP_ID
+            user.is_staff     = True
+            user.is_superuser = True
+            user.is_active    = True
+            user.is_locked    = False
+            user.failed_login_attempts = 0
+            user.locked_until = None
+            user.set_password(ADMIN_PASSWORD)
+            user.save()
 
-        UserProfile.objects.get_or_create(user=user)
+            # Step 4: Ensure profile exists
+            UserProfile.objects.get_or_create(user=user)
 
-        label = 'Created' if created else 'Reset'
-        self.stdout.write(self.style.SUCCESS(f'[{label}] Admin account ready'))
-        self.stdout.write(f'  Username : {ADMIN_USERNAME}')
-        self.stdout.write(f'  Password : {ADMIN_PASSWORD}')
-        self.stdout.write(self.style.SUCCESS('  Status   : Active, unlocked'))
+            label = 'CREATED' if created else 'RESET'
+            self.stdout.write(self.style.SUCCESS(f'[{label}] Admin account ready'))
+            self.stdout.write(f'  Username : {ADMIN_USERNAME}')
+            self.stdout.write(f'  Password : {ADMIN_PASSWORD}')
+            self.stdout.write(self.style.SUCCESS('  Status   : Active, unlocked'))
+
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'[ERROR] reset_admin failed: {e}'))
+            # Last-resort fallback: force via raw SQL
+            from django.db import connection
+            self.stdout.write('  Attempting raw SQL fallback...')
+            try:
+                from django.contrib.auth.hashers import make_password
+                hashed = make_password(ADMIN_PASSWORD)
+                with connection.cursor() as cur:
+                    cur.execute(
+                        "UPDATE auth_user SET password=%s, is_active=1, is_locked=0, "
+                        "failed_login_attempts=0 WHERE username=%s",
+                        [hashed, ADMIN_USERNAME]
+                    )
+                    if cur.rowcount == 0:
+                        self.stdout.write(self.style.WARNING('  User not found via SQL either.'))
+                    else:
+                        self.stdout.write(self.style.SUCCESS('  Password reset via SQL fallback.'))
+            except Exception as e2:
+                self.stdout.write(self.style.ERROR(f'  SQL fallback also failed: {e2}'))
