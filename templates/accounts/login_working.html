@@ -410,8 +410,8 @@
                     <hr class="my-4">
                     
                     <!-- Admin Access Button -->
-                    <div class="text-center">
-                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill" onclick="promptAdminPassword()">
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" id="adminAccessBtn" style="z-index: 1000 !important; position: relative;">
                             <i class="fas fa-shield-alt me-2"></i> Admin Dashboard Access
                         </button>
                     </div>
@@ -510,8 +510,8 @@
         });
     }
     
-    // Admin dashboard access - make it global
-    window.promptAdminPassword = function() {
+    // Admin dashboard access
+    function promptAdminPassword() {
         const adminPassword = prompt('Enter Admin Password:');
         if (adminPassword === 'CCAMS2026Admin!') {
             // Fill credentials and submit
@@ -529,7 +529,19 @@
         } else if (adminPassword !== null) {
             alert('Incorrect password. Please try again.');
         }
-    };
+    }
+    
+    // Add event listener to admin access button
+    document.addEventListener('DOMContentLoaded', function() {
+        const adminBtn = document.getElementById('adminAccessBtn');
+        if (adminBtn) {
+            adminBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                promptAdminPassword();
+            });
+        }
+    });
     
     function showSuccess(message) {
         const successAlert = document.getElementById('successAlert');
