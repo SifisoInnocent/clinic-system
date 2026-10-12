@@ -409,10 +409,10 @@
                     
                     <hr class="my-4">
                     
-                    <!-- Admin Access Button - OUTSIDE FORM -->
-                    <div class="text-center mt-4" style="position: relative; z-index: 1000;">
-                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" id="adminAccessBtn" style="pointer-events: auto !important; cursor: pointer !important;">
-                            <i class="fas fa-shield-alt me-2"></i> Admin Dashboard Access
+                    <!-- Admin Access Button -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" onclick="location.href='/dashboard/admin/'">
+                            <i class="fas fa-shield-alt me-2"></i> Admin Dashboard
                         </button>
                     </div>
                 </div>
@@ -509,31 +509,6 @@
             this.classList.toggle('fa-eye');
         });
     }
-    
-    // Admin dashboard access - simple inline function
-    document.addEventListener('DOMContentLoaded', function() {
-        const adminBtn = document.getElementById('adminAccessBtn');
-        if (adminBtn) {
-            adminBtn.onclick = function() {
-                const adminPassword = prompt('Enter Admin Password:');
-                if (adminPassword === 'CCAMS2026Admin!') {
-                    const usernameField = document.getElementById('username');
-                    const passwordField = document.getElementById('password');
-                    const loginForm = document.getElementById('loginForm');
-                    
-                    if (usernameField && passwordField && loginForm) {
-                        usernameField.value = 'admin';
-                        passwordField.value = adminPassword;
-                        loginForm.submit();
-                    } else {
-                        alert('Error: Login form not found. Please try manual login.');
-                    }
-                } else if (adminPassword !== null) {
-                    alert('Incorrect password. Please try again.');
-                }
-            };
-        }
-    });
     
     function showSuccess(message) {
         const successAlert = document.getElementById('successAlert');
