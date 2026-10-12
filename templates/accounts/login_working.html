@@ -409,36 +409,11 @@
                     
                     <hr class="my-4">
                     
-                    <!-- Demo credentials - floating cards style -->
-                    <div>
-                        <p class="text-center small fw-semibold text-secondary mb-2"><i class="fas fa-magic me-1"></i> Quick Demo Roles</p>
-                        <div class="row g-2">
-                            <div class="col-6 col-md-3">
-                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('admin', 'CCAMS2026Admin!')">
-                                    <span class="role-dot" style="background: #6c5ce7;"></span>
-                                    <span class="small fw-medium">Admin</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('nurse01', 'nurse123')">
-                                    <span class="role-dot" style="background: #00b894;"></span>
-                                    <span class="small">Nurse</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('psych01', 'psych123')">
-                                    <span class="role-dot" style="background: #fdcb6e;"></span>
-                                    <span class="small">Psychologist</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="demo-badge-grid p-2 text-center" onclick="fillCredentials('student01', 'student123')">
-                                    <span class="role-dot" style="background: #0984e3;"></span>
-                                    <span class="small">Student</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-center text-muted mt-2 mb-0" style="font-size: 0.7rem;">One‑click fill & login</p>
+                    <!-- Admin Access Button -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill" onclick="promptAdminPassword()">
+                            <i class="fas fa-shield-alt me-2"></i> Admin Dashboard Access
+                        </button>
                     </div>
                 </div>
             </div>
@@ -526,7 +501,7 @@
     // Toggle password visibility
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
-    if(togglePassword) {
+    if(togglePassword && passwordInput) {
         togglePassword.addEventListener('click', function () {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
@@ -535,23 +510,18 @@
         });
     }
     
-    // fill demo credentials + smooth feedback
-    window.fillCredentials = function(username, password) {
-        const userField = document.getElementById('username');
-        const passField = document.getElementById('password');
-        userField.value = username;
-        passField.value = password;
-        // highlight effect
-        userField.style.transition = '0.15s';
-        passField.style.transition = '0.15s';
-        userField.style.boxShadow = '0 0 0 3px rgba(108,92,231,0.3)';
-        passField.style.boxShadow = '0 0 0 3px rgba(108,92,231,0.3)';
-        setTimeout(() => {
-            userField.style.boxShadow = '';
-            passField.style.boxShadow = '';
-        }, 800);
-        showSuccess(`✓ ${username} credentials ready — click "Sign in"`);
-    };
+    // Admin dashboard access
+    function promptAdminPassword() {
+        const adminPassword = prompt('Enter Admin Password:');
+        if (adminPassword === 'CCAMS2026Admin!') {
+            // Fill credentials and submit
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = adminPassword;
+            document.getElementById('loginForm').submit();
+        } else if (adminPassword !== null) {
+            alert('Incorrect password. Please try again.');
+        }
+    }
     
     function showSuccess(message) {
         const successAlert = document.getElementById('successAlert');
