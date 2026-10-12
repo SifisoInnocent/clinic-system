@@ -409,9 +409,9 @@
                     
                     <hr class="my-4">
                     
-                    <!-- Admin Access Button -->
-                    <div class="text-center mt-4">
-                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" id="adminAccessBtn" style="z-index: 1000 !important; position: relative;">
+                    <!-- Admin Access Button - OUTSIDE FORM -->
+                    <div class="text-center mt-4" style="position: relative; z-index: 1000;">
+                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" id="adminAccessBtn" style="pointer-events: auto !important; cursor: pointer !important;">
                             <i class="fas fa-shield-alt me-2"></i> Admin Dashboard Access
                         </button>
                     </div>
@@ -510,36 +510,28 @@
         });
     }
     
-    // Admin dashboard access
-    function promptAdminPassword() {
-        const adminPassword = prompt('Enter Admin Password:');
-        if (adminPassword === 'CCAMS2026Admin!') {
-            // Fill credentials and submit
-            const usernameField = document.getElementById('username');
-            const passwordField = document.getElementById('password');
-            const loginForm = document.getElementById('loginForm');
-            
-            if (usernameField && passwordField && loginForm) {
-                usernameField.value = 'admin';
-                passwordField.value = adminPassword;
-                loginForm.submit();
-            } else {
-                alert('Error: Login form not found. Please try manual login.');
-            }
-        } else if (adminPassword !== null) {
-            alert('Incorrect password. Please try again.');
-        }
-    }
-    
-    // Add event listener to admin access button
+    // Admin dashboard access - simple inline function
     document.addEventListener('DOMContentLoaded', function() {
         const adminBtn = document.getElementById('adminAccessBtn');
         if (adminBtn) {
-            adminBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                promptAdminPassword();
-            });
+            adminBtn.onclick = function() {
+                const adminPassword = prompt('Enter Admin Password:');
+                if (adminPassword === 'CCAMS2026Admin!') {
+                    const usernameField = document.getElementById('username');
+                    const passwordField = document.getElementById('password');
+                    const loginForm = document.getElementById('loginForm');
+                    
+                    if (usernameField && passwordField && loginForm) {
+                        usernameField.value = 'admin';
+                        passwordField.value = adminPassword;
+                        loginForm.submit();
+                    } else {
+                        alert('Error: Login form not found. Please try manual login.');
+                    }
+                } else if (adminPassword !== null) {
+                    alert('Incorrect password. Please try again.');
+                }
+            };
         }
     });
     
