@@ -538,8 +538,10 @@
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     
-    // Auto-clear fields disabled for easier testing
-    
+    // Auto-clear timer (no-op — feature disabled)
+    var autoClearTimer = null;
+    function resetAutoClearTimer() { /* disabled */ }
+
     // Clear timer and mark as submitted on form submit
     if(loginForm) {
         loginForm.addEventListener('submit', function(e) {
