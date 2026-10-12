@@ -336,35 +336,21 @@
                     <form method="post" id="registerForm" action="/accounts/register/">
                         {% csrf_token %}
                         
-                        <!-- Role Selection -->
+                        <!-- Role Selection - Student Only -->
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Select Your Role</label>
+                            <label class="form-label fw-semibold">Account Type</label>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Public registration is for students only. Staff accounts (nurse, psychologist) are created by administrators.
+                            </div>
+                            <input type="hidden" name="role" value="student" id="role_student">
                             <div class="role-selection">
                                 <div class="role-option">
-                                    <input type="radio" name="role" value="student" id="role_student" checked>
-                                    <div class="role-card">
+                                    <div class="role-card" style="border-color: #6c5ce7; background: rgba(108, 92, 231, 0.1);">
                                         <div class="role-icon">
                                             <i class="fas fa-graduation-cap"></i>
                                         </div>
                                         <p class="role-name">Student</p>
-                                    </div>
-                                </div>
-                                <div class="role-option">
-                                    <input type="radio" name="role" value="nurse" id="role_nurse">
-                                    <div class="role-card">
-                                        <div class="role-icon">
-                                            <i class="fas fa-user-nurse"></i>
-                                        </div>
-                                        <p class="role-name">Nurse</p>
-                                    </div>
-                                </div>
-                                <div class="role-option">
-                                    <input type="radio" name="role" value="psychologist" id="role_psychologist">
-                                    <div class="role-card">
-                                        <div class="role-icon">
-                                            <i class="fas fa-brain"></i>
-                                        </div>
-                                        <p class="role-name">Psychologist</p>
                                     </div>
                                 </div>
                             </div>

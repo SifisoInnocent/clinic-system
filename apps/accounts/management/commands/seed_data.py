@@ -138,13 +138,13 @@ class Command(BaseCommand):
                 'is_superuser': True
             }
         )
-        admin.set_password('admin123')
+        admin.set_password('CCAMS2026Admin!')
         admin.save()
-        
+
         if created:
             UserProfile.objects.get_or_create(user=admin)
-        
-        self.stdout.write(self.style.SUCCESS('Admin user ready: admin/admin123'))
+
+        self.stdout.write(self.style.SUCCESS('Admin user ready: admin/CCAMS2026Admin!'))
         
         # Create staff users
         nurse, created = User.objects.get_or_create(
