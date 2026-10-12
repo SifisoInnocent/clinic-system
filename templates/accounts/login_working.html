@@ -504,197 +504,137 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    if(togglePassword && passwordInput) {
+    // -- Password visibility toggle
+    var togglePassword = document.getElementById('togglePassword');
+    var passwordField  = document.getElementById('password');
+    if (togglePassword && passwordField) {
         togglePassword.addEventListener('click', function () {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
+            var t = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', t);
             this.classList.toggle('fa-eye-slash');
             this.classList.toggle('fa-eye');
         });
     }
-    
-    function showSuccess(message) {
-        const successAlert = document.getElementById('successAlert');
-        const successMsg = document.getElementById('successMessage');
-        successMsg.innerText = message;
-        successAlert.classList.remove('d-none');
-        setTimeout(() => successAlert.classList.add('d-none'), 2500);
-    }
-    
-    function showError(message) {
-        const errorAlert = document.getElementById('errorAlert');
-        const errorMsgSpan = document.getElementById('errorMessage');
-        errorMsgSpan.innerText = message;
-        errorAlert.classList.remove('d-none');
-        setTimeout(() => errorAlert.classList.add('d-none'), 4000);
-    }
-    
-    // form validation + loading
-    const loginForm = document.getElementById('loginForm');
-    const loginBtn = document.getElementById('loginBtn');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    
-    // Auto-clear timer (no-op — feature disabled)
-    var autoClearTimer = null;
-    function resetAutoClearTimer() { /* disabled */ }
 
-    // Clear timer and mark as submitted on form submit
-    if(loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            clearTimeout(autoClearTimer);
-            loginForm.dataset.submitted = 'true';
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            if(!username || !password) {
+    // -- Alert helpers
+    function showSuccess(message) {
+        var el = document.getElementById('successAlert');
+        var msg = document.getElementById('successMessage');
+        if (el && msg) {
+            msg.innerText = message;
+            el.classList.remove('d-none');
+            setTimeout(function(){ el.classList.add('d-none'); }, 2500);
+        }
+    }
+    function showError(message) {
+        var el = document.getElementById('errorAlert');
+        var msg = document.getElementById('errorMessage');
+        if (el && msg) {
+            msg.innerText = message;
+            el.classList.remove('d-none');
+            setTimeout(function(){ el.classList.add('d-none'); }, 4000);
+        }
+    }
+
+    // -- Login form submit
+    var loginForm = document.getElementById('loginForm');
+    var loginBtn  = document.getElementById('loginBtn');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function (e) {
+            var usernameVal = (document.getElementById('username') || {value:''}).value.trim();
+            var passwordVal = (document.getElementById('password') || {value:''}).value;
+            if (!usernameVal || !passwordVal) {
                 e.preventDefault();
                 showError('Both username and password are required.');
                 return false;
             }
-            if(password.length < 4) {
+            if (passwordVal.length < 4) {
                 e.preventDefault();
                 showError('Password must be at least 4 characters.');
                 return false;
             }
-            if(loginBtn) {
-                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Authenticating...';
+            if (loginBtn) {
+                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Signing in...';
                 loginBtn.disabled = true;
-                loginBtn.classList.add('opacity-75');
             }
-            return true;
         });
     }
-    
-    // Start timer on page load
-    resetAutoClearTimer();
-    
-    // Remember me localstorage
-    const rememberCheck = document.getElementById('rememberMe');
-    const usernameEl = document.getElementById('username');
-    if(localStorage.getItem('ccams_remember_user')) {
+
+    // -- Remember me
+    var rememberCheck = document.getElementById('rememberMe');
+    var usernameEl    = document.getElementById('username');
+    if (usernameEl && localStorage.getItem('ccams_remember_user')) {
         usernameEl.value = localStorage.getItem('ccams_remember_user');
-        if(rememberCheck) rememberCheck.checked = true;
+        if (rememberCheck) rememberCheck.checked = true;
     }
-    if(rememberCheck) {
-        rememberCheck.addEventListener('change', function() {
-            if(this.checked && usernameEl.value.trim()) {
+    if (rememberCheck && usernameEl) {
+        rememberCheck.addEventListener('change', function () {
+            if (this.checked && usernameEl.value.trim()) {
                 localStorage.setItem('ccams_remember_user', usernameEl.value.trim());
-            } else if(!this.checked) {
+            } else if (!this.checked) {
                 localStorage.removeItem('ccams_remember_user');
             }
         });
-        usernameEl.addEventListener('input', function() {
-            if(rememberCheck.checked && this.value.trim()) {
+        usernameEl.addEventListener('input', function () {
+            if (rememberCheck.checked && this.value.trim()) {
                 localStorage.setItem('ccams_remember_user', this.value.trim());
             }
         });
     }
-    
-    // attempt warning (demo only)
-    let attemptCount = parseInt(localStorage.getItem('loginAttemptCount') || '0');
-    const attemptDiv = document.getElementById('attemptWarning');
-    const attemptSpan = document.getElementById('attemptCount');
-    function updateAttemptUI() {
-        if(attemptDiv && attemptSpan) {
-            if(attemptCount > 0) {
-                attemptSpan.innerText = attemptCount;
-                attemptDiv.classList.remove('d-none');
-                if(attemptCount >= 4) attemptDiv.classList.add('bg-danger', 'bg-opacity-25');
-            } else {
-                attemptDiv.classList.add('d-none');
-                attemptDiv.classList.remove('bg-danger', 'bg-opacity-25');
-            }
-        }
-    }
-    updateAttemptUI();
-    // double click on demo card to reset attempts (nice UX)
-    const demoCardArea = document.querySelector('.login-glass .row.g-2');
-    if(demoCardArea) {
-        demoCardArea.addEventListener('dblclick', () => {
-            localStorage.setItem('loginAttemptCount', '0');
-            attemptCount = 0;
-            updateAttemptUI();
-            showSuccess('Attempt counter reset');
-        });
-    }
-    
-    // smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const targetId = this.getAttribute('href');
-            if(targetId !== "#" && targetId !== "" && targetId !== "#login-panel" && targetId !== "#features" && targetId !== "#about") {
-                const targetElem = document.querySelector(targetId);
-                if(targetElem) {
-                    e.preventDefault();
-                    targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+
+    // -- Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            var id = this.getAttribute('href');
+            if (id && id.length > 1) {
+                var target = document.querySelector(id);
+                if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
             }
         });
     });
-    
-    // Theme Switcher Logic
+
+    // -- Theme toggle
     function toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('ccams_theme', newTheme);
-        updateThemeIcon(newTheme);
+        var next = (document.documentElement.getAttribute('data-theme') || 'light') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('ccams_theme', next);
+        updateThemeIcon(next);
     }
-
     function updateThemeIcon(theme) {
-        const icon = document.getElementById('themeIcon');
-        if(icon) {
-            icon.className = theme === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
-        }
+        var icon = document.getElementById('themeIcon');
+        if (icon) icon.className = theme === 'dark' ? 'fas fa-sun text-warning' : 'fas fa-moon';
     }
 
-    // Font Scaler Logic
-    const fontScales = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
-    const fontLabels = {'font-sm': 'A-', 'font-md': 'A', 'font-lg': 'A+', 'font-xl': 'A++'};
-    
+    // -- Font scaler
+    var fontScales = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+    var fontLabels = { 'font-sm': 'A-', 'font-md': 'A', 'font-lg': 'A+', 'font-xl': 'A++' };
     function cycleFontSize() {
-        const current = localStorage.getItem('ccams_font_scale') || 'font-md';
-        const nextIdx = (fontScales.indexOf(current) + 1) % fontScales.length;
-        const nextScale = fontScales[nextIdx];
-        document.documentElement.className = nextScale;
-        localStorage.setItem('ccams_font_scale', nextScale);
-        updateFontLabel(nextScale);
+        var cur  = localStorage.getItem('ccams_font_scale') || 'font-md';
+        var next = fontScales[(fontScales.indexOf(cur) + 1) % fontScales.length];
+        document.documentElement.className = next;
+        localStorage.setItem('ccams_font_scale', next);
+        updateFontLabel(next);
     }
-
     function updateFontLabel(scale) {
-        const label = document.getElementById('fontScaleLabel');
-        if(label) label.innerText = fontLabels[scale] || 'A';
+        var label = document.getElementById('fontScaleLabel');
+        if (label) label.innerText = fontLabels[scale] || 'A';
     }
 
-    // Live Clinic Status Logic
+    // -- Clinic status
     function updateClinicStatus() {
-        const pill = document.getElementById('clinicStatusPill');
-        const text = document.getElementById('clinicStatusText');
-        const dot = document.getElementById('clinicPulseDot');
+        var pill = document.getElementById('clinicStatusPill');
+        var text = document.getElementById('clinicStatusText');
+        var dot  = document.getElementById('clinicPulseDot');
         if (!pill || !text || !dot) return;
-
-        const now = new Date();
-        const day = now.getDay();
-        const hour = now.getHours();
-        const isWeekday = (day >= 1 && day <= 5);
-        const isOpen = isWeekday && (hour >= 8 && hour < 17);
-
-        if (isOpen) {
-            dot.className = 'pulse-dot-wrapper pulse-green';
-            text.innerText = 'Open Today 08:00 - 17:00';
-            pill.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        } else {
-            dot.className = 'pulse-dot-wrapper pulse-amber';
-            text.innerText = isWeekday ? 'Closed (Opens 08:00)' : 'Closed for Weekend';
-            pill.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-        }
+        var d = new Date(), day = d.getDay(), hour = d.getHours();
+        var isOpen = day >= 1 && day <= 5 && hour >= 8 && hour < 17;
+        dot.className  = isOpen ? 'pulse-dot-wrapper pulse-green' : 'pulse-dot-wrapper pulse-amber';
+        text.innerText = isOpen ? 'Open Today 08:00 - 17:00'
+                                : (day >= 1 && day <= 5 ? 'Closed (Opens 08:00)' : 'Closed for Weekend');
+        pill.style.borderColor = isOpen ? 'rgba(16,185,129,0.4)' : 'rgba(245,158,11,0.4)';
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function () {
         updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'light');
         updateFontLabel(localStorage.getItem('ccams_font_scale') || 'font-md');
         updateClinicStatus();
