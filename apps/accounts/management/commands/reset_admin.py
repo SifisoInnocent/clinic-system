@@ -4,41 +4,50 @@ from apps.accounts.models import UserProfile
 
 User = get_user_model()
 
+ADMIN_USERNAME = 'AdminSpuClinic'
+ADMIN_PASSWORD = 'SpuClinic@2026'
+ADMIN_EMAIL    = 'admin@spuclinic.ac.za'
+
 
 class Command(BaseCommand):
-    help = 'Reset admin password to admin123 or create admin if not exists'
-    
+    help = 'Create or reset the AdminSpuClinic admin account on every deploy'
+
     def handle(self, *args, **options):
-        admin, created = User.objects.get_or_create(
-            username='admin',
+        # Remove any old default 'admin' user if it still exists
+        User.objects.filter(username='admin', role='admin').delete()
+
+        # Create or update the real admin account
+        user, created = User.objects.get_or_create(
+            username=ADMIN_USERNAME,
             defaults={
-                'email': 'admin@clinic.edu',
-                'first_name': 'System',
-                'last_name': 'Administrator',
-                'role': 'admin',
-                'employee_id': 'ADMIN001',
-                'is_staff': True,
+                'email':        ADMIN_EMAIL,
+                'first_name':   'System',
+                'last_name':    'Administrator',
+                'role':         'admin',
+                'employee_id':  'ADMINSPU001',
+                'is_staff':     True,
                 'is_superuser': True,
-                'is_active': True
+                'is_active':    True,
+                'is_locked':    False,
+                'failed_login_attempts': 0,
             }
         )
-        
-        # Reset password
-        admin.set_password('admin123')
-        
-        # Unlock account and reset failed attempts
-        admin.is_locked = False
-        admin.failed_login_attempts = 0
-        admin.locked_until = None
-        admin.is_active = True
-        admin.save()
-        
-        if created:
-            UserProfile.objects.get_or_create(user=admin)
-            self.stdout.write(self.style.SUCCESS('Admin user created'))
-        else:
-            self.stdout.write(self.style.SUCCESS('Admin password reset and unlocked'))
-        
-        self.stdout.write('Username: admin')
-        self.stdout.write('Password: admin123')
-        self.stdout.write(self.style.SUCCESS('Account is now unlocked and active'))
+
+        # Always force correct state regardless of create/update
+        user.set_password(ADMIN_PASSWORD)
+        user.role         = 'admin'
+        user.is_staff     = True
+        user.is_superuser = True
+        user.is_active    = True
+        user.is_locked    = False
+        user.failed_login_attempts = 0
+        user.locked_until = None
+        user.save()
+
+        UserProfile.objects.get_or_create(user=user)
+
+        label = 'Created' if created else 'Reset'
+        self.stdout.write(self.style.SUCCESS(f'[{label}] Admin account ready'))
+        self.stdout.write(f'  Username : {ADMIN_USERNAME}')
+        self.stdout.write(f'  Password : {ADMIN_PASSWORD}')
+        self.stdout.write(self.style.SUCCESS('  Status   : Active, unlocked'))
