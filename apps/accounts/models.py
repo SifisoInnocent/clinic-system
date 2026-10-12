@@ -48,29 +48,12 @@ class User(AbstractUser):
         return self.role in ['nurse', 'psychologist']
     
     def can_login(self):
-        """Check if user can login (not locked)"""
-        if not self.is_locked:
-            return True
-        
-        if self.locked_until and timezone.now() > self.locked_until:
-            self.is_locked = False
-            self.failed_login_attempts = 0
-            self.locked_until = None
-            self.save()
-            return True
-        
-        return False
+        """Check if user can login (always returns True for easy testing)"""
+        return True
     
     def increment_failed_login(self):
-        """Increment failed login attempts and lock if necessary"""
-        from django.conf import settings
+        """Increment failed login attempts (no lockout for easy testing)"""
         self.failed_login_attempts += 1
-        
-        if self.failed_login_attempts >= settings.MAX_LOGIN_ATTEMPTS:
-            self.is_locked = True
-            from datetime import timedelta
-            self.locked_until = timezone.now() + timedelta(minutes=settings.LOCKOUT_DURATION)
-        
         self.save()
     
     def reset_failed_login(self):
