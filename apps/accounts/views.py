@@ -60,6 +60,47 @@ def login_view(request):
     return render(request, 'accounts/login_working.html', {'form': form})
 
 
+def admin_portal_login(request):
+    """Dedicated admin portal login — only allows role=admin users."""
+    if request.user.is_authenticated:
+        if request.user.role == 'admin':
+            return redirect('/dashboard/admin/')
+        else:
+            return redirect('/dashboard/')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        authenticated_user = authenticate(request, username=username, password=password)
+
+        if authenticated_user:
+            if authenticated_user.role != 'admin':
+                messages.error(request, 'Access denied. This portal is restricted to administrators only.')
+            elif not authenticated_user.can_login():
+                messages.error(request, 'Your account is locked. Contact IT support.')
+            else:
+                login(request, authenticated_user)
+                authenticated_user.reset_failed_login()
+                try:
+                    AuditLog.log_action(
+                        admin=authenticated_user,
+                        action='login',
+                        description=f"Admin {authenticated_user.username} accessed admin portal",
+                        ip_address=get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                    )
+                except:
+                    pass
+                messages.success(request, f'Welcome, {authenticated_user.get_full_name()}!')
+                return redirect('/dashboard/admin/')
+        else:
+            messages.error(request, 'Invalid credentials. Access denied.')
+
+    return render(request, 'accounts/admin_portal.html')
+
+
+
 @login_required
 def logout_view(request):
     """Logout view with audit logging"""

@@ -409,17 +409,11 @@
                     
                     <hr class="my-4">
                     
-                    <!-- Admin Access Button -->
+                    <!-- Admin Portal Link -->
                     <div class="text-center">
-                        <button type="button" class="btn btn-outline-dark w-100 rounded-pill py-2" onclick="
-                            document.getElementById('username').value = 'admin';
-                            document.getElementById('password').focus();
-                            document.getElementById('password').placeholder = 'Enter admin password...';
-                            this.innerHTML = '<i class=\'fas fa-shield-alt me-2\'></i> Fill username → enter password above';
-                            this.disabled = true;
-                        ">
-                            <i class="fas fa-shield-alt me-2"></i> Admin Portal Access
-                        </button>
+                        <a href="{% url 'accounts:admin_portal_login' %}" class="btn w-100 rounded-pill py-2 fw-semibold" style="background: linear-gradient(135deg,#1e1b4b,#312e81); color:#a5b4fc; border: 1px solid rgba(99,102,241,0.4); letter-spacing:0.02em; transition: all 0.2s;">
+                            <i class="fas fa-shield-halved me-2"></i> Admin Portal
+                        </a>
                     </div>
                 </div>
             </div>

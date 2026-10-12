@@ -46,6 +46,7 @@ urlpatterns = [
     # Direct routes for convenience
     path('login/', RedirectView.as_view(url='/accounts/login/', permanent=False), name='direct_login'),
     path('register/', RedirectView.as_view(url='/accounts/register/', permanent=False), name='direct_register'),
+    path('admin-portal/', RedirectView.as_view(url='/accounts/admin-portal/', permanent=False), name='admin_portal'),
     
     # Root redirect
     path('', RedirectView.as_view(url='/dashboard/', permanent=False), name='home'),
