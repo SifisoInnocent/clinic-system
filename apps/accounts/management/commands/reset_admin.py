@@ -4,26 +4,21 @@ from apps.accounts.models import UserProfile
 
 User = get_user_model()
 
-ADMIN_USERNAME = 'AdminSpuClinic'
-ADMIN_PASSWORD = 'SpuClinic@2026'
-ADMIN_EMAIL    = 'admin@spuclinic.ac.za'
-ADMIN_EMP_ID   = 'ADMINSPU001'
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'admin123'
+ADMIN_EMAIL    = 'admin@clinic.edu'
+ADMIN_EMP_ID   = 'ADMIN001'
 
 
 class Command(BaseCommand):
-    help = 'Create or reset the AdminSpuClinic admin account on every deploy'
+    help = 'Create or reset the admin account on every deploy'
 
     def handle(self, *args, **options):
         try:
-            # Step 1: Wipe any conflicting users that would block creation
-            # (old 'admin' user OR any user with the same employee_id)
-            User.objects.filter(username='admin').delete()
-            User.objects.filter(employee_id=ADMIN_EMP_ID).exclude(username=ADMIN_USERNAME).delete()
-
-            # Step 2: Get or create the admin user
+            # Step 1: Get or create the admin user
             user, created = User.objects.get_or_create(username=ADMIN_USERNAME)
 
-            # Step 3: Force all fields to correct state
+            # Step 2: Force all fields to correct state
             user.email        = ADMIN_EMAIL
             user.first_name   = 'System'
             user.last_name    = 'Administrator'
@@ -38,7 +33,7 @@ class Command(BaseCommand):
             user.set_password(ADMIN_PASSWORD)
             user.save()
 
-            # Step 4: Ensure profile exists
+            # Step 3: Ensure profile exists
             UserProfile.objects.get_or_create(user=user)
 
             label = 'CREATED' if created else 'RESET'

@@ -144,7 +144,7 @@ class Command(BaseCommand):
         if created:
             UserProfile.objects.get_or_create(user=admin)
 
-        self.stdout.write(self.style.SUCCESS('Admin user ready: admin/CCAMS2026Admin!'))
+        self.stdout.write(self.style.SUCCESS('Admin user ready: admin/admin123'))
         
         # Create staff users
         nurse, created = User.objects.get_or_create(
@@ -159,6 +159,8 @@ class Command(BaseCommand):
             }
         )
         nurse.set_password('nurse123')
+        nurse.is_active = True
+        nurse.is_staff = True
         nurse.save()
         if created:
             UserProfile.objects.get_or_create(user=nurse)
@@ -176,6 +178,8 @@ class Command(BaseCommand):
             }
         )
         psychologist.set_password('psych123')
+        psychologist.is_active = True
+        psychologist.is_staff = True
         psychologist.save()
         if created:
             UserProfile.objects.get_or_create(user=psychologist)
