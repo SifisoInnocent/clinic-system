@@ -405,6 +405,7 @@ def get_available_slots_view(request):
         
         # Generate time slots
         available_slots = []
+        booked_slots = []
         for availability in availabilities:
             current_time = availability.start_time
             end_time = availability.end_time
@@ -428,7 +429,7 @@ def get_available_slots_view(request):
                     is_past_slot = (appointment_date == timezone.now().date() and current_time <= timezone.localtime().time())
                     
                     if not is_past_slot:
-                        # Check if slot is not already booked
+                        # Check if slot is already booked
                         booked = Appointment.objects.filter(
                             staff=staff,
                             appointment_date=appointment_date,
@@ -441,11 +442,20 @@ def get_available_slots_view(request):
                                 'time': current_time.strftime('%H:%M'),
                                 'display': current_time.strftime('%I:%M %p')
                             })
+                        else:
+                            booked_slots.append({
+                                'time': current_time.strftime('%H:%M'),
+                                'display': current_time.strftime('%I:%M %p')
+                            })
                 
                 # Increment by 30 minutes
                 current_time = (datetime.combine(datetime.min, current_time) + timedelta(minutes=30)).time()
         
-        return JsonResponse({'slots': available_slots})
+        return JsonResponse({
+            'slots': available_slots,
+            'booked': booked_slots,
+            'staff_name': staff.get_full_name()
+        })
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

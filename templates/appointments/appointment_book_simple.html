@@ -597,26 +597,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 container.innerHTML = '';
                 
                 if (data.slots && data.slots.length > 0) {
+                    // Show available slots
                     data.slots.forEach(slot => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = 'btn btn-outline-primary btn-sm rounded-pill px-3 slot-chip';
+                        btn.className = 'btn btn-outline-success btn-sm rounded-pill px-3 slot-chip';
                         btn.textContent = slot.display;
                         btn.dataset.time = slot.time;
                         
                         // Check if currently matches
                         if (timeInput && timeInput.value === slot.time) {
-                            btn.classList.remove('btn-outline-primary');
-                            btn.classList.add('btn-primary', 'text-white');
+                            btn.classList.remove('btn-outline-success');
+                            btn.classList.add('btn-success', 'text-white');
                         }
                         
                         btn.addEventListener('click', function() {
                             document.querySelectorAll('.slot-chip').forEach(c => {
-                                c.classList.remove('btn-primary', 'text-white');
-                                c.classList.add('btn-outline-primary');
+                                c.classList.remove('btn-success', 'text-white', 'btn-outline-success');
+                                c.classList.add('btn-outline-success');
                             });
-                            btn.classList.remove('btn-outline-primary');
-                            btn.classList.add('btn-primary', 'text-white');
+                            btn.classList.remove('btn-outline-success');
+                            btn.classList.add('btn-success', 'text-white');
                             if (timeInput) {
                                 timeInput.value = slot.time;
                             }
@@ -625,6 +626,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         container.appendChild(btn);
                     });
+                    
+                    // Show booked slots with alternative suggestions
+                    if (data.booked && data.booked.length > 0) {
+                        const bookedSection = document.createElement('div');
+                        bookedSection.className = 'mt-3';
+                        bookedSection.innerHTML = '<p class="small text-muted mb-2"><i class="fas fa-clock me-1"></i>Booked slots (try these alternative times):</p>';
+                        
+                        data.booked.forEach(slot => {
+                            const chip = document.createElement('span');
+                            chip.className = 'badge bg-secondary me-1 mb-1 text-decoration line-through';
+                            chip.textContent = slot.display;
+                            bookedSection.appendChild(chip);
+                        });
+                        
+                        container.appendChild(bookedSection);
+                    }
                 } else {
                     if (noSlots) noSlots.classList.remove('d-none');
                 }
