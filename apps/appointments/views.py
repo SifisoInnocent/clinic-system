@@ -19,6 +19,7 @@ from apps.accounts.decorators import student_required, staff_required, admin_or_
 from apps.availability.models import Availability
 from apps.notifications.services import NotificationService
 from apps.audit.models import AuditLog
+from apps.audit.models import AuditLog
 
 
 @login_required
@@ -93,72 +94,91 @@ def appointment_list_view(request):
 @student_required
 def appointment_book_view(request):
     """Book new appointment (student only)"""
+    from datetime import datetime, timedelta
+    from django.utils import timezone
+    
     # Load all active nurses and psychologists
-    nurses = User.objects.filter(role='nurse', is_active=True).order_by('first_name', 'last_name')
-    psychologists = User.objects.filter(role='psychologist', is_active=True).order_by('first_name', 'last_name')
+    staff_members = User.objects.filter(
+        role__in=['nurse', 'psychologist'], 
+        is_active=True
+    ).order_by('first_name', 'last_name')
     
     if request.method == 'POST':
-        from .forms_simple import SimpleAppointmentBookingForm
-        form = SimpleAppointmentBookingForm(request.POST)
-        if form.is_valid():
+        staff_id = request.POST.get('staff')
+        appointment_date = request.POST.get('appointment_date')
+        appointment_time = request.POST.get('appointment_time')
+        reason = request.POST.get('reason')
+        provider_type = request.POST.get('provider_type')
+        
+        if staff_id and appointment_date and appointment_time and reason:
             try:
-                # Create appointment
-                appointment = Appointment.objects.create(
-                    student=request.user,
-                    staff=form.cleaned_data['staff'],
-                    provider_type=form.cleaned_data['provider_type'],
-                    appointment_date=form.cleaned_data['appointment_date'],
-                    appointment_time=form.cleaned_data['appointment_time'],
-                    reason=form.cleaned_data['reason'],
-                    status='pending'
-                )
+                staff = User.objects.get(id=staff_id)
                 
-                # Create appointment history
-                AppointmentHistory.objects.create(
-                    appointment=appointment,
-                    action='created',
-                    new_status='pending',
-                    changed_by=request.user,
-                    notes='Appointment created'
-                )
+                # Check for duplicate booking
+                existing = Appointment.objects.filter(
+                    staff=staff,
+                    appointment_date=appointment_date,
+                    appointment_time=appointment_time,
+                    status__in=['pending', 'confirmed']
+                ).exists()
                 
-                # Log appointment creation (silent if fails)
-                try:
-                    AuditLog.log_action(
-                        admin=request.user,
-                        action='create_appointment',
-                        target_object=f'Appointment {appointment.appointment_id}',
-                        description=f"Student {request.user.username} booked appointment with {appointment.staff.get_full_name()}",
-                        ip_address=get_client_ip(request),
-                        user_agent=request.META.get('HTTP_USER_AGENT', '')
+                if existing:
+                    messages.error(request, 'This time slot is already booked. Please choose a different time.')
+                else:
+                    # Create appointment
+                    appointment = Appointment.objects.create(
+                        student=request.user,
+                        staff=staff,
+                        provider_type=provider_type or staff.role,
+                        appointment_date=appointment_date,
+                        appointment_time=appointment_time,
+                        reason=reason,
+                        status='pending'
                     )
-                except:
-                    pass
-                
-                # Send notification (silent if fails)
-                try:
-                    notification_service = NotificationService()
-                    notification_service.send_booking_confirmation(appointment)
-                except:
-                    pass
-                
-                messages.success(request, 'Your appointment has been booked successfully!')
-                return redirect('appointments:appointment_detail', appointment_id=appointment.appointment_id)
+                    
+                    # Create appointment history
+                    AppointmentHistory.objects.create(
+                        appointment=appointment,
+                        action='created',
+                        new_status='pending',
+                        changed_by=request.user,
+                        notes='Appointment created'
+                    )
+                    
+                    # Send notification (non-blocking)
+                    try:
+                        from apps.notifications.services import NotificationService
+                        NotificationService.send_appointment_confirmation(appointment)
+                    except:
+                        pass
+                    
+                    # Log audit (non-blocking)
+                    try:
+                        AuditLog.log_action(
+                            admin=request.user,
+                            action='book_appointment',
+                            target_user=staff.username,
+                            description=f"Student {request.user.username} booked appointment with {staff.get_full_name()} on {appointment_date} at {appointment_time}",
+                            ip_address=get_client_ip(request),
+                            user_agent=request.META.get('HTTP_USER_AGENT', '')
+                        )
+                    except:
+                        pass
+                    
+                    messages.success(request, 'Appointment booked successfully!')
+                    return redirect('appointments:appointment_list')
+                    
+            except User.DoesNotExist:
+                messages.error(request, 'Invalid staff member selected.')
             except Exception as e:
                 messages.error(request, f'Error booking appointment: {str(e)}')
-    else:
-        from .forms_simple import SimpleAppointmentBookingForm
-        form = SimpleAppointmentBookingForm()
+        else:
+            messages.error(request, 'Please fill in all required fields.')
     
     context = {
-        'form': form,
-        'nurses': nurses,
-        'psychologists': psychologists,
-        'available_nurses': nurses,
-        'available_psychologists': psychologists,
-        'today': timezone.now().date(),
+        'staff_members': staff_members,
+        'today': timezone.now().date()
     }
-    
     return render(request, 'appointments/appointment_book_simple.html', context)
 
 
@@ -491,16 +511,6 @@ def get_staff_by_type_view(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-def get_client_ip(request):
-    """Get client IP address"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
 
 
 @login_required
