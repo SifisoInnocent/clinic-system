@@ -377,6 +377,9 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
+                                    <a href="{% url 'availability:availability_toggle' availability.id %}" class="btn btn-action {% if availability.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %}" title="{% if availability.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        <i class="fas {% if availability.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+                                    </a>
                                     <a href="{% url 'availability:availability_edit' availability.id %}" class="btn btn-action btn-outline-primary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
