@@ -68,7 +68,6 @@ def availability_edit_view(request, availability_id):
 
 
 @staff_required
-@require_POST
 def availability_toggle_view(request, availability_id):
     """Toggle availability active status"""
     availability = get_object_or_404(Availability, id=availability_id, staff=request.user)
