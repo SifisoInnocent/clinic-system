@@ -284,44 +284,14 @@ def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         
-        # Create user manually to bypass validation
-        username = request.POST.get('username', '')
-        # Try both password and password1 depending on form structure
-        password = request.POST.get('password') or request.POST.get('password1', '')
-        
-        if username and password:
-            # Handle unique constraints: empty strings must be converted to None
-            student_num = request.POST.get('student_number', '').strip() or None
-            emp_id = request.POST.get('employee_id', '').strip() or None
+        if form.is_valid():
+            user = form.save()
             
+            # Create profile
+            UserProfile.objects.get_or_create(user=user)
+            
+            # Log successful registration
             try:
-                # Check if user already exists
-                if User.objects.filter(username=username).exists():
-                    # User exists, try to update password
-                    user = User.objects.get(username=username)
-                    user.set_password(password)
-                    user.email = request.POST.get('email', user.email or '')
-                    user.first_name = request.POST.get('first_name', user.first_name or '')
-                    user.last_name = request.POST.get('last_name', user.last_name or '')
-                    user.role = 'student'
-                    user.student_number = student_num if student_num else user.student_number
-                    user.phone_number = request.POST.get('phone_number', user.phone_number or '')
-                    user.is_active = True
-                    user.save()
-                else:
-                    # Create new user
-                    user = User.objects.create_user(
-                        username=username,
-                        password=password,
-                        email=request.POST.get('email', ''),
-                        first_name=request.POST.get('first_name', ''),
-                        last_name=request.POST.get('last_name', ''),
-                        role='student',
-                        student_number=student_num,
-                        phone_number=request.POST.get('phone_number', '')
-                    )
-                
-                # Log successful registration
                 AuditLog.log_action(
                     admin=user,
                     action='register',
@@ -329,24 +299,17 @@ def register_view(request):
                     ip_address=get_client_ip(request),
                     user_agent=request.META.get('HTTP_USER_AGENT', '')
                 )
-                
-                messages.success(request, 'Account created successfully! You can now log in.')
-                return redirect('/accounts/login/')
-            except Exception as e:
-                # If user creation fails, log the error and try to create a minimal user with the requested role
-                print(f"Error creating user: {e}")
-                try:
-                    user = User.objects.create_user(
-                        username=username,
-                        password=password,
-                        role='student'
-                    )
-                    messages.success(request, 'Account created successfully! You can now log in.')
-                    return redirect('/accounts/login/')
-                except Exception as e2:
-                    # If everything fails, show success anyway
-                    messages.success(request, 'Account created successfully! You can now log in.')
-                    return redirect('/accounts/login/')
+            except:
+                pass
+            
+            messages.success(request, f'Registration successful! You can now login as {user.role}.')
+            return redirect('accounts:login')
+        else:
+            # Display form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field.replace("_", " ").title()}: {error}')
+    
     else:
         form = CustomUserCreationForm()
     
