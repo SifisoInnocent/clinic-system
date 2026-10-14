@@ -19,7 +19,7 @@ from apps.accounts.decorators import student_required, staff_required, admin_or_
 from apps.availability.models import Availability
 from apps.notifications.services import NotificationService
 from apps.audit.models import AuditLog
-from apps.audit.models import AuditLog
+from apps.accounts.views import get_client_ip
 
 
 @login_required
