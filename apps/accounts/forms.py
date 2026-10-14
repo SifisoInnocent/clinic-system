@@ -60,6 +60,9 @@ class CustomUserCreationForm(UserCreationForm):
                 raise ValidationError('Invalid registration code. Only staff with the correct code can register.')
             if not employee_id:
                 raise ValidationError('Employee ID is required for staff roles')
+        else:
+            # For students, clear employee_id to avoid unique constraint issues
+            cleaned_data['employee_id'] = None
         
         if role == 'student' and not student_number:
             raise ValidationError('Student number is required for student role')
@@ -80,6 +83,9 @@ class CustomUserCreationForm(UserCreationForm):
         
         if role in ['nurse', 'psychologist']:
             user.is_staff = True
+        else:
+            # For students, ensure employee_id is None
+            user.employee_id = None
         
         if commit:
             user.save()
