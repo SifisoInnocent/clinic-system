@@ -39,7 +39,7 @@ class AuditLog(models.Model):
         null=True, 
         related_name='audit_actions'
     )
-    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
     target_user = models.CharField(max_length=150, blank=True)  # Username or ID of target
     target_object = models.CharField(max_length=150, blank=True)  # Object type and ID
     description = models.TextField()
