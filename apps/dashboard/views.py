@@ -165,47 +165,14 @@ def admin_dashboard_view(request):
     today_appointments = Appointment.objects.filter(appointment_date=today).count()
     
     # Get appointment status counts
-    pending_appointments = Appointment.objects.filter(status='pending').count()
-    confirmed_appointments = Appointment.objects.filter(status='confirmed').count()
-    completed_appointments = Appointment.objects.filter(status='completed').count()
-    cancelled_appointments = Appointment.objects.filter(status='cancelled').count()
-    no_show_appointments = Appointment.objects.filter(status='no_show').count()
+    pending_count = Appointment.objects.filter(status='pending').count()
+    confirmed_count = Appointment.objects.filter(status='confirmed').count()
+    completed_count = Appointment.objects.filter(status='completed').count()
+    cancelled_count = Appointment.objects.filter(status='cancelled').count()
+    no_show_count = Appointment.objects.filter(status='no_show').count()
     
     # Get recent appointments
     recent_appointments = Appointment.objects.order_by('-created_at')[:10]
-    
-    # Get monthly appointment statistics (last 6 months)
-    six_months_ago = today - timedelta(days=180)
-    monthly_stats = []
-    
-    for i in range(6):
-        month_start = (six_months_ago.replace(day=1) + timedelta(days=32*i)).replace(day=1)
-        month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
-        
-        month_appointments = Appointment.objects.filter(
-            appointment_date__gte=month_start,
-            appointment_date__lte=month_end
-        ).count()
-        
-        monthly_stats.append({
-            'month': month_start.strftime('%B %Y'),
-            'count': month_appointments
-        })
-    
-    # Get staff performance statistics
-    staff_stats = User.objects.filter(
-        role__in=['nurse', 'psychologist']
-    ).annotate(
-        total_appointments=Count('staff_appointments'),
-        completed_appointments=Count(
-            'staff_appointments',
-            filter=Q(staff_appointments__status='completed')
-        ),
-        no_show_appointments=Count(
-            'staff_appointments',
-            filter=Q(staff_appointments__status='no_show')
-        )
-    ).order_by('-total_appointments')
     
     context = {
         'total_users': total_users,
@@ -214,14 +181,12 @@ def admin_dashboard_view(request):
         'total_admins': total_admins,
         'total_appointments': total_appointments,
         'today_appointments': today_appointments,
-        'pending_appointments': pending_appointments,
-        'confirmed_appointments': confirmed_appointments,
-        'completed_appointments': completed_appointments,
-        'cancelled_appointments': cancelled_appointments,
-        'no_show_appointments': no_show_appointments,
+        'pending_count': pending_count,
+        'confirmed_count': confirmed_count,
+        'completed_count': completed_count,
+        'cancelled_count': cancelled_count,
+        'no_show_count': no_show_count,
         'recent_appointments': recent_appointments,
-        'monthly_stats': monthly_stats,
-        'staff_stats': staff_stats,
     }
     
     return render(request, 'dashboard/admin_dashboard.html', context)

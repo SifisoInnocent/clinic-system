@@ -127,24 +127,24 @@ class Command(BaseCommand):
         
         # Create or reset admin user
         admin, created = User.objects.get_or_create(
-            username='admin',
+            username='SPUAdmin',
             defaults={
-                'email': 'admin@clinic.edu',
+                'email': 'admin@spuclinic.ac.za',
                 'first_name': 'System',
                 'last_name': 'Administrator',
                 'role': 'admin',
-                'employee_id': 'ADMIN001',
+                'employee_id': 'SPUADMIN001',
                 'is_staff': True,
                 'is_superuser': True
             }
         )
-        admin.set_password('CCAMS2026Admin!')
+        admin.set_password('Spu@Admin')
         admin.save()
 
         if created:
             UserProfile.objects.get_or_create(user=admin)
 
-        self.stdout.write(self.style.SUCCESS('Admin user ready: admin/admin123'))
+        self.stdout.write(self.style.SUCCESS('Admin user ready: SPUAdmin/Spu@Admin'))
         
         # Create staff users
         nurse, created = User.objects.get_or_create(
