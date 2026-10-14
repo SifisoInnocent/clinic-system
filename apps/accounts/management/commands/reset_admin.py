@@ -4,10 +4,10 @@ from apps.accounts.models import UserProfile
 
 User = get_user_model()
 
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'admin123'
-ADMIN_EMAIL    = 'admin@clinic.edu'
-ADMIN_EMP_ID   = 'ADMIN001'
+ADMIN_USERNAME = 'SPUAdmin'
+ADMIN_PASSWORD = 'Spu@Admin'
+ADMIN_EMAIL    = 'admin@spuclinic.ac.za'
+ADMIN_EMP_ID   = 'SPUADMIN001'
 
 
 class Command(BaseCommand):
