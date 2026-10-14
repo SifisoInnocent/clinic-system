@@ -2,6 +2,27 @@
 
 from django.db import migrations, models
 
+NEW_FIELDS = ('buffer_time', 'session_length')
+
+
+def add_missing_columns(apps, schema_editor):
+    """Add columns unless 0003's raw SQL already added them (existing PostgreSQL DBs)."""
+    Availability = apps.get_model('availability', 'Availability')
+    table = Availability._meta.db_table
+    with schema_editor.connection.cursor() as cursor:
+        existing = {
+            col.name for col in schema_editor.connection.introspection.get_table_description(cursor, table)
+        }
+    for name in NEW_FIELDS:
+        if name not in existing:
+            schema_editor.add_field(Availability, Availability._meta.get_field(name))
+
+
+def remove_columns(apps, schema_editor):
+    Availability = apps.get_model('availability', 'Availability')
+    for name in NEW_FIELDS:
+        schema_editor.remove_field(Availability, Availability._meta.get_field(name))
+
 
 class Migration(migrations.Migration):
 
@@ -10,14 +31,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='availability',
-            name='buffer_time',
-            field=models.IntegerField(default=15, help_text='Buffer time between sessions in minutes'),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name='availability',
+                    name='buffer_time',
+                    field=models.IntegerField(default=15, help_text='Buffer time between sessions in minutes'),
+                ),
+                migrations.AddField(
+                    model_name='availability',
+                    name='session_length',
+                    field=models.IntegerField(default=60, help_text='Session length in minutes'),
+                ),
+            ],
+            database_operations=[],
         ),
-        migrations.AddField(
-            model_name='availability',
-            name='session_length',
-            field=models.IntegerField(default=60, help_text='Session length in minutes'),
-        ),
+        migrations.RunPython(add_missing_columns, remove_columns),
     ]
