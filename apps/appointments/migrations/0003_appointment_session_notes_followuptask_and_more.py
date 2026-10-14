@@ -5,6 +5,18 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+class PostgresOnlyRunSQL(migrations.RunSQL):
+    """Raw SQL below is PostgreSQL-specific; on other backends 0001/0004 create these tables."""
+
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        if schema_editor.connection.vendor == 'postgresql':
+            super().database_forwards(app_label, schema_editor, from_state, to_state)
+
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        if schema_editor.connection.vendor == 'postgresql':
+            super().database_backwards(app_label, schema_editor, from_state, to_state)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,7 +31,7 @@ class Migration(migrations.Migration):
             field=models.TextField(blank=True, help_text='Confidential notes for psychologists'),
         ),
         # Only create FollowUpTask table if it doesn't exist
-        migrations.RunSQL(
+        PostgresOnlyRunSQL(
             sql="""
                 CREATE TABLE IF NOT EXISTS follow_up_tasks (
                     id SERIAL PRIMARY KEY,
@@ -39,7 +51,7 @@ class Migration(migrations.Migration):
             """
         ),
         # Only create AppointmentHistory table if it doesn't exist
-        migrations.RunSQL(
+        PostgresOnlyRunSQL(
             sql="""
                 CREATE TABLE IF NOT EXISTS appointment_history (
                     id SERIAL PRIMARY KEY,

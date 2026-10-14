@@ -5,6 +5,20 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def create_follow_up_tasks_table(apps, schema_editor):
+    """Create the table unless 0003's raw SQL already created it (existing PostgreSQL DBs)."""
+    FollowUpTask = apps.get_model('appointments', 'FollowUpTask')
+    table = FollowUpTask._meta.db_table
+    if table not in schema_editor.connection.introspection.table_names():
+        schema_editor.create_model(FollowUpTask)
+
+
+def drop_follow_up_tasks_table(apps, schema_editor):
+    FollowUpTask = apps.get_model('appointments', 'FollowUpTask')
+    if FollowUpTask._meta.db_table in schema_editor.connection.introspection.table_names():
+        schema_editor.delete_model(FollowUpTask)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,21 +27,27 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='FollowUpTask',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('completed', 'Completed')], default='pending', max_length=20)),
-                ('due_date', models.DateField()),
-                ('notes', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('appointment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follow_up_tasks', to='appointments.appointment')),
-                ('assigned_to', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assigned_follow_ups', to=settings.AUTH_USER_MODEL)),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.CreateModel(
+                    name='FollowUpTask',
+                    fields=[
+                        ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                        ('status', models.CharField(choices=[('pending', 'Pending'), ('completed', 'Completed')], default='pending', max_length=20)),
+                        ('due_date', models.DateField()),
+                        ('notes', models.TextField(blank=True)),
+                        ('created_at', models.DateTimeField(auto_now_add=True)),
+                        ('updated_at', models.DateTimeField(auto_now=True)),
+                        ('appointment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follow_up_tasks', to='appointments.appointment')),
+                        ('assigned_to', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assigned_follow_ups', to=settings.AUTH_USER_MODEL)),
+                    ],
+                    options={
+                        'db_table': 'follow_up_tasks',
+                        'ordering': ['-due_date'],
+                    },
+                ),
             ],
-            options={
-                'db_table': 'follow_up_tasks',
-                'ordering': ['-due_date'],
-            },
+            database_operations=[],
         ),
+        migrations.RunPython(create_follow_up_tasks_table, drop_follow_up_tasks_table),
     ]
