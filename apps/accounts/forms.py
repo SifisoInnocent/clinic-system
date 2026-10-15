@@ -12,27 +12,11 @@ class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=False)
     student_number = forms.CharField(max_length=20, required=False)
     phone_number = forms.CharField(max_length=20, required=False)
-    role = forms.ChoiceField(
-        choices=[
-            ('student', 'Student'),
-            ('nurse', 'Nurse'),
-            ('psychologist', 'Psychologist'),
-        ],
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    employee_id = forms.CharField(max_length=20, required=False)
-    registration_code = forms.CharField(
-        max_length=20, 
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter registration code for staff accounts'}),
-        help_text='Required for nurse and psychologist accounts. Ask your administrator for the code.'
-    )
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'role',
-                 'student_number', 'employee_id', 'phone_number', 'registration_code', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name', 
+                 'student_number', 'phone_number', 'password1', 'password2')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,30 +25,19 @@ class CustomUserCreationForm(UserCreationForm):
         self.fields['first_name'].widget.attrs.update({'class': 'form-control'})
         self.fields['last_name'].widget.attrs.update({'class': 'form-control'})
         self.fields['student_number'].widget.attrs.update({'class': 'form-control'})
-        self.fields['employee_id'].widget.attrs.update({'class': 'form-control'})
         self.fields['phone_number'].widget.attrs.update({'class': 'form-control'})
-        self.fields['registration_code'].widget.attrs.update({'class': 'form-control'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
     
     def clean(self):
         cleaned_data = super().clean()
-        role = cleaned_data.get('role')
-        registration_code = cleaned_data.get('registration_code')
         student_number = cleaned_data.get('student_number')
-        employee_id = cleaned_data.get('employee_id')
         
-        # Validate registration code for staff roles
-        if role in ['nurse', 'psychologist']:
-            if not registration_code or registration_code != 'SPU2026':
-                raise ValidationError('Invalid registration code. Only staff with the correct code can register.')
-            if not employee_id:
-                raise ValidationError('Employee ID is required for staff roles')
-        else:
-            # For students, clear employee_id to avoid unique constraint issues
-            cleaned_data['employee_id'] = None
+        # Force role to be student
+        cleaned_data['role'] = 'student'
+        cleaned_data['employee_id'] = None
         
-        if role == 'student' and not student_number:
+        if not student_number:
             raise ValidationError('Student number is required for student role')
     
     def clean_email(self):
@@ -79,13 +52,8 @@ class CustomUserCreationForm(UserCreationForm):
     
     def save(self, commit=True):
         user = super().save(commit=False)
-        role = self.cleaned_data.get('role')
-        
-        if role in ['nurse', 'psychologist']:
-            user.is_staff = True
-        else:
-            # For students, ensure employee_id is None
-            user.employee_id = None
+        user.role = 'student'
+        user.employee_id = None
         
         if commit:
             user.save()
@@ -205,6 +173,11 @@ class UserCreateForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
+        
+        # Set is_staff for nurse and psychologist roles
+        if user.role in ['nurse', 'psychologist']:
+            user.is_staff = True
+        
         if commit:
             user.save()
         return user

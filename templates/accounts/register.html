@@ -336,42 +336,14 @@
                     <form method="post" id="registerForm" action="/accounts/register/">
                         {% csrf_token %}
                         
-                        <!-- Role Selection -->
+                        <!-- Student Registration Only -->
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Account Type</label>
+                            <label class="form-label mb-3">Student Registration</label>
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
-                                Students can register directly. Staff (nurse, psychologist) require a registration code from your administrator.
+                                Public registration is for students only. Staff accounts (nurse, psychologist) are created by administrators through the admin dashboard.
                             </div>
-                            <div class="role-selection">
-                                <div class="role-option">
-                                    <input type="radio" name="role" value="student" id="role_student" checked>
-                                    <div class="role-card">
-                                        <div class="role-icon">
-                                            <i class="fas fa-graduation-cap"></i>
-                                        </div>
-                                        <p class="role-name">Student</p>
-                                    </div>
-                                </div>
-                                <div class="role-option">
-                                    <input type="radio" name="role" value="nurse" id="role_nurse">
-                                    <div class="role-card">
-                                        <div class="role-icon">
-                                            <i class="fas fa-user-nurse"></i>
-                                        </div>
-                                        <p class="role-name">Nurse</p>
-                                    </div>
-                                </div>
-                                <div class="role-option">
-                                    <input type="radio" name="role" value="psychologist" id="role_psychologist">
-                                    <div class="role-card">
-                                        <div class="role-icon">
-                                            <i class="fas fa-brain"></i>
-                                        </div>
-                                        <p class="role-name">Psychologist</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <input type="hidden" name="role" value="student" id="role_student">
                         </div>
                         
                         <div class="row">
@@ -397,17 +369,6 @@
                         <div class="mb-3" id="student_number_field">
                             <label class="form-label fw-semibold">Student Number</label>
                             <input type="text" class="form-control form-control-custom" name="student_number" id="student_number" placeholder="Student number" value="{{ request.POST.student_number }}">
-                        </div>
-                        
-                        <div class="mb-3" id="employee_id_field" style="display: none;">
-                            <label class="form-label fw-semibold">Employee ID</label>
-                            <input type="text" class="form-control form-control-custom" name="employee_id" id="employee_id" placeholder="Employee ID" value="{{ request.POST.employee_id }}">
-                        </div>
-                        
-                        <div class="mb-3" id="registration_code_field" style="display: none;">
-                            <label class="form-label fw-semibold">Registration Code <span class="text-muted small">(Required for staff)</span></label>
-                            <input type="text" class="form-control form-control-custom" name="registration_code" id="registration_code" placeholder="Enter code from administrator" value="{{ request.POST.registration_code }}">
-                            <small class="text-muted">Ask your administrator for the registration code</small>
                         </div>
                         
                         <div class="mb-3">
@@ -536,46 +497,6 @@
             this.classList.toggle('fa-eye-slash');
         });
     }
-    
-    // Role selection handler
-    const roleRadios = document.querySelectorAll('input[name="role"]');
-    const roleCards = document.querySelectorAll('.role-card');
-    const studentNumberField = document.getElementById('student_number_field');
-    const employeeIdField = document.getElementById('employee_id_field');
-    const registrationCodeField = document.getElementById('registration_code_field');
-    
-    // Add click handlers to role cards
-    roleCards.forEach((card, index) => {
-        card.addEventListener('click', function() {
-            const radio = roleRadios[index];
-            if (radio) {
-                radio.checked = true;
-                radio.dispatchEvent(new Event('change'));
-            }
-        });
-    });
-    
-    roleRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            // Show/hide appropriate fields based on role
-            if (this.value === 'student') {
-                studentNumberField.style.display = 'block';
-                employeeIdField.style.display = 'none';
-                registrationCodeField.style.display = 'none';
-                document.getElementById('student_number').required = true;
-                document.getElementById('employee_id').required = false;
-                document.getElementById('registration_code').required = false;
-            } else {
-                // nurse or psychologist
-                studentNumberField.style.display = 'none';
-                employeeIdField.style.display = 'block';
-                registrationCodeField.style.display = 'block';
-                document.getElementById('student_number').required = false;
-                document.getElementById('employee_id').required = true;
-                document.getElementById('registration_code').required = true;
-            }
-        });
-    });
     
     // Form validation
     const registerForm = document.getElementById('registerForm');
