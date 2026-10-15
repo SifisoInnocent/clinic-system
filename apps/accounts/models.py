@@ -48,12 +48,27 @@ class User(AbstractUser):
         return self.role in ['nurse', 'psychologist']
     
     def can_login(self):
-        """Check if user can login (always returns True for easy testing)"""
+        """Check if user can login (enforces lockout after 5 failed attempts)"""
+        if self.is_locked:
+            if self.locked_until and self.locked_until > timezone.now():
+                return False
+            else:
+                # Lockout period expired, unlock account
+                self.is_locked = False
+                self.failed_login_attempts = 0
+                self.locked_until = None
+                self.save()
         return True
     
     def increment_failed_login(self):
-        """Increment failed login attempts (no lockout for easy testing)"""
+        """Increment failed login attempts and lock after 5 attempts"""
         self.failed_login_attempts += 1
+        
+        # Lock account after 5 failed attempts for 30 minutes
+        if self.failed_login_attempts >= 5:
+            self.is_locked = True
+            self.locked_until = timezone.now() + timezone.timedelta(minutes=30)
+        
         self.save()
     
     def reset_failed_login(self):

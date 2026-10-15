@@ -54,7 +54,18 @@ def login_view(request):
                 messages.success(request, f'Welcome back, {authenticated_user.get_full_name()}!')
                 return redirect('/dashboard/')
         else:
-            messages.error(request, 'Invalid username or password.')
+            # Increment failed login attempts for invalid credentials
+            try:
+                user = User.objects.get(username=username)
+                user.increment_failed_login()
+                
+                if user.is_locked:
+                    messages.error(request, f'Account locked due to too many failed attempts. Try again in 30 minutes.')
+                else:
+                    remaining_attempts = 5 - user.failed_login_attempts
+                    messages.error(request, f'Invalid username or password. {remaining_attempts} attempts remaining.')
+            except User.DoesNotExist:
+                messages.error(request, 'Invalid username or password.')
     
     form = CustomAuthenticationForm()
     return render(request, 'accounts/login_working.html', {'form': form})
@@ -95,7 +106,18 @@ def admin_portal_login(request):
                 messages.success(request, f'Welcome, {authenticated_user.get_full_name()}!')
                 return redirect('/dashboard/admin/')
         else:
-            messages.error(request, 'Invalid credentials. Access denied.')
+            # Increment failed login attempts for invalid credentials
+            try:
+                user = User.objects.get(username=username)
+                user.increment_failed_login()
+                
+                if user.is_locked:
+                    messages.error(request, f'Account locked due to too many failed attempts. Try again in 30 minutes.')
+                else:
+                    remaining_attempts = 5 - user.failed_login_attempts
+                    messages.error(request, f'Invalid credentials. {remaining_attempts} attempts remaining.')
+            except User.DoesNotExist:
+                messages.error(request, 'Invalid credentials. Access denied.')
 
     return render(request, 'accounts/admin_portal.html')
 
