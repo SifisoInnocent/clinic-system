@@ -3,33 +3,49 @@
 {% block title %}Bulk Availability - CCAMS{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container mt-5">
     <div class="row">
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <i class="fas fa-calendar-plus me-2"></i>
                         Create Bulk Availability
                     </h4>
                 </div>
                 <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
                     <form method="post">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.day_of_week.id_for_label }}" class="form-label">Day of Week</label>
-                                    {{ form.day_of_week }}
-                                    {% if form.day_of_week.errors %}
-                                        <div class="text-danger">
-                                            {% for error in form.day_of_week.errors %}
-                                                <small>{{ error }}</small>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Days</label>
+                            <div class="form-check">
+                                {% for value, label in form.days.field.choices %}
+                                    <div class="form-check form-check-inline me-3">
+                                        <input class="form-check-input" type="checkbox" name="days" value="{{ value }}" id="day_{{ value }}">
+                                        <label class="form-check-label" for="day_{{ value }}">{{ label }}</label>
+                                    </div>
+                                {% endfor %}
                             </div>
+                            {% if form.days.errors %}
+                                <div class="text-danger mt-2">
+                                    {% for error in form.days.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time</label>
@@ -43,41 +59,13 @@
                                     {% endif %}
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
-                            {{ form.end_time }}
-                            {% if form.end_time.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.end_time.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="{{ form.date_from.id_for_label }}" class="form-label">From Date</label>
-                                    {{ form.date_from }}
-                                    {% if form.date_from.errors %}
+                                    <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
+                                    {{ form.end_time }}
+                                    {% if form.end_time.errors %}
                                         <div class="text-danger">
-                                            {% for error in form.date_from.errors %}
-                                                <small>{{ error }}</small>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.date_to.id_for_label }}" class="form-label">To Date</label>
-                                    {{ form.date_to }}
-                                    {% if form.date_to.errors %}
-                                        <div class="text-danger">
-                                            {% for error in form.date_to.errors %}
+                                            {% for error in form.end_time.errors %}
                                                 <small>{{ error }}</small>
                                             {% endfor %}
                                         </div>
