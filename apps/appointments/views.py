@@ -300,6 +300,9 @@ def appointment_reschedule_view(request, appointment_id):
             appointment.status = 'pending'  # Reset to pending
             appointment.save()
             
+            # Get reason for history
+            reason = form.cleaned_data.get('reason', 'No reason provided')
+            
             # Create appointment history
             AppointmentHistory.objects.create(
                 appointment=appointment,
@@ -307,7 +310,7 @@ def appointment_reschedule_view(request, appointment_id):
                 old_status='confirmed',
                 new_status='pending',
                 changed_by=request.user,
-                notes=f'Rescheduled from {old_date} {old_time} with {old_staff.get_full_name()} to {appointment.appointment_date} {appointment.appointment_time} with {appointment.staff.get_full_name()}'
+                notes=f'Rescheduled from {old_date} {old_time} with {old_staff.get_full_name()} to {appointment.appointment_date} {appointment.appointment_time} with {appointment.staff.get_full_name()}. Reason: {reason}'
             )
             
             # Log reschedule

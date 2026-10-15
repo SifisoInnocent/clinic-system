@@ -89,6 +89,11 @@ class AppointmentRescheduleForm(forms.ModelForm):
             'appointment_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
         }
     
+    reason = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional: Reason for rescheduling'})
+    )
+    
     def clean_appointment_date(self):
         appointment_date = self.cleaned_data.get('appointment_date')
         if appointment_date and appointment_date < timezone.now().date():
