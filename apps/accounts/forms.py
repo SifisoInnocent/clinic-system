@@ -104,8 +104,14 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class UserCreateForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
+        label='Password'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm password'}),
+        label='Confirm Password'
+    )
     
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -134,6 +140,9 @@ class UserCreateForm(forms.ModelForm):
         
         if password and password_confirm and password != password_confirm:
             raise ValidationError('Passwords do not match')
+        
+        if not password:
+            raise ValidationError('Password is required')
         
         role = cleaned_data.get('role')
         student_number = cleaned_data.get('student_number')
