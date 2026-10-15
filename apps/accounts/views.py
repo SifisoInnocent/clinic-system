@@ -182,28 +182,36 @@ def user_create_view(request):
     if request.method == 'POST':
         form = UserCreateForm(request.POST, request=request)
         if form.is_valid():
-            user = form.save()
-            
-            # Set is_staff for staff roles
-            if user.role in ['nurse', 'psychologist', 'admin']:
-                user.is_staff = True
-                user.save()
-            
-            # Create user profile
-            UserProfile.objects.create(user=user)
-            
-            # Log user creation
-            AuditLog.log_action(
-                admin=request.user,
-                action='create_user',
-                target_user=user.username,
-                description=f"Created user {user.username} with role {user.role}",
-                ip_address=get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')
-            )
-            
-            messages.success(request, f'User {user.username} has been created successfully!')
-            return redirect('accounts:user_list')
+            try:
+                user = form.save()
+                
+                # Set is_staff for staff roles
+                if user.role in ['nurse', 'psychologist', 'admin']:
+                    user.is_staff = True
+                    user.save()
+                
+                # Create user profile (use get_or_create to avoid duplicate)
+                UserProfile.objects.get_or_create(user=user)
+                
+                # Log user creation
+                AuditLog.log_action(
+                    admin=request.user,
+                    action='create_user',
+                    target_user=user.username,
+                    description=f"Created user {user.username} with role {user.role}",
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
+                
+                messages.success(request, f'User {user.username} has been created successfully!')
+                return redirect('accounts:user_list')
+            except Exception as e:
+                messages.error(request, f'Error creating user: {str(e)}')
+        else:
+            # Show form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field.replace("_", " ").title()}: {error}')
     else:
         form = UserCreateForm(request=request)
     

@@ -154,20 +154,17 @@ class UserCreateForm(forms.ModelForm):
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if email and User.objects.filter(email=email).exists():
-            raise ValidationError('A user with that email already exists.')
+        # Allow duplicate emails for easier admin user creation
         return email
     
     def clean_student_number(self):
         student_number = self.cleaned_data.get('student_number')
-        if student_number and User.objects.filter(student_number=student_number).exists():
-            raise ValidationError('A user with that student number already exists.')
+        # Allow duplicate student numbers for easier admin user creation
         return student_number if student_number else None
     
     def clean_employee_id(self):
         employee_id = self.cleaned_data.get('employee_id')
-        if employee_id and User.objects.filter(employee_id=employee_id).exists():
-            raise ValidationError('A user with that employee ID already exists.')
+        # Allow duplicate employee IDs for easier admin user creation
         return employee_id if employee_id else None
     
     def save(self, commit=True):
